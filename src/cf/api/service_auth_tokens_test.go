@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -169,7 +170,7 @@ func createServiceAuthTokenRepo(request testnet.TestRequest) (ts *httptest.Serve
 	ts, handler = testnet.NewTLSServer([]testnet.TestRequest{request})
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerServiceAuthTokenRepository(configRepo, gateway)
 	return
 }

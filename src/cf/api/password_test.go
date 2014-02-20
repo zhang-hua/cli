@@ -3,6 +3,7 @@ package api_test
 import (
 	. "cf/api"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -36,7 +37,7 @@ func createPasswordRepo(req testnet.TestRequest) (passwordServer *httptest.Serve
 	endpointRepo := &testapi.FakeEndpointRepo{}
 	endpointRepo.UAAEndpointReturns.Endpoint = passwordServer.URL
 	configRepo := testconfig.NewRepositoryWithDefaults()
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerPasswordRepository(configRepo, gateway, endpointRepo)
 	return
 }

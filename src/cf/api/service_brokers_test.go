@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -217,7 +218,7 @@ func createServiceBrokerRepo(requests ...testnet.TestRequest) (ts *httptest.Serv
 	ts, handler = testnet.NewTLSServer(requests)
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerServiceBrokerRepository(configRepo, gateway)
 	return
 }

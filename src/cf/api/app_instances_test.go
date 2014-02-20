@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -92,7 +93,7 @@ func createAppInstancesRepo(requests []testnet.TestRequest) (ts *httptest.Server
 	space.Guid = "my-space-guid"
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerAppInstancesRepository(configRepo, gateway)
 	return
 }

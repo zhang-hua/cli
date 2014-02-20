@@ -3,6 +3,7 @@ package api_test
 import (
 	. "cf/api"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -108,7 +109,7 @@ func createStackRepo(req testnet.TestRequest) (ts *httptest.Server, handler *tes
 
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerStackRepository(configRepo, gateway)
 	return
 }

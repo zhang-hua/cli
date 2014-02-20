@@ -3,6 +3,7 @@ package api_test
 import (
 	. "cf/api"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -85,7 +86,7 @@ func createServiceSummaryRepo(req testnet.TestRequest) (ts *httptest.Server, han
 	ts, handler = testnet.NewTLSServer([]testnet.TestRequest{req})
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerServiceSummaryRepository(configRepo, gateway)
 	return
 }

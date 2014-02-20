@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/configuration"
 	"cf/net"
+	"clocks"
 	"encoding/base64"
 	"fmt"
 	. "github.com/onsi/ginkgo"
@@ -144,7 +145,7 @@ func setupAuthDependencies(request testnet.TestRequest) (deps authDependencies) 
 	deps.config = testconfig.NewRepository()
 	deps.config.SetAuthorizationEndpoint(deps.ts.URL)
 
-	deps.gateway = net.NewUAAGateway()
+	deps.gateway = net.NewUAAGateway(clocks.New())
 	return
 }
 

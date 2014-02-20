@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	"errors"
 	"fmt"
 	. "github.com/onsi/ginkgo"
@@ -86,8 +87,8 @@ var _ = Describe("UserRepository", func() {
 			configRepo := testconfig.NewRepositoryWithDefaults()
 			configRepo.SetApiEndpoint(ts.URL)
 
-			ccGateway := net.NewCloudControllerGateway()
-			uaaGateway := net.NewUAAGateway()
+			ccGateway := net.NewCloudControllerGateway(clocks.New())
+			uaaGateway := net.NewUAAGateway(clocks.New())
 			endpointRepo := &testapi.FakeEndpointRepo{}
 			endpointRepo.UAAEndpointReturns.ApiResponse = net.NewApiResponseWithError("Failed to get endpoint!", errors.New("Failed!"))
 
@@ -444,8 +445,8 @@ func createUsersRepo(ccReqs []testnet.TestRequest, uaaReqs []testnet.TestRequest
 
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ccTarget)
-	ccGateway := net.NewCloudControllerGateway()
-	uaaGateway := net.NewUAAGateway()
+	ccGateway := net.NewCloudControllerGateway(clocks.New())
+	uaaGateway := net.NewUAAGateway(clocks.New())
 	endpointRepo := &testapi.FakeEndpointRepo{}
 	endpointRepo.UAAEndpointReturns.Endpoint = uaaTarget
 	repo = NewCloudControllerUserRepository(configRepo, uaaGateway, ccGateway, endpointRepo)

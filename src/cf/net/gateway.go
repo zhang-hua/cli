@@ -2,6 +2,7 @@ package net
 
 import (
 	"cf"
+	"clocks"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -56,13 +57,15 @@ type Request struct {
 }
 
 type Gateway struct {
+	clock           clocks.Clock
 	authenticator   tokenRefresher
 	errHandler      errorHandler
 	PollingEnabled  bool
 	PollingThrottle time.Duration
 }
 
-func newGateway(errHandler errorHandler) (gateway Gateway) {
+func newGateway(clock clocks.Clock, errHandler errorHandler) (gateway Gateway) {
+	gateway.clock = clock
 	gateway.errHandler = errHandler
 	gateway.PollingThrottle = DEFAULT_POLLING_THROTTLE
 	return
@@ -277,9 +280,9 @@ func (gateway Gateway) PerformPollingRequestForJSONResponse(request *Request, re
 }
 
 func (gateway Gateway) waitForJob(jobUrl, accessToken string, timeout time.Duration) (apiResponse ApiResponse) {
-	startTime := time.Now()
+	startTime := gateway.clock.Now()
 	for true {
-		if time.Since(startTime) > timeout {
+		if gateway.clock.Since(startTime) > timeout {
 			apiResponse = NewApiResponseWithMessage("Error: timed out waiting for async job '%s' to finish", jobUrl)
 			return
 		}
@@ -302,8 +305,7 @@ func (gateway Gateway) waitForJob(jobUrl, accessToken string, timeout time.Durat
 		}
 
 		accessToken = request.HttpReq.Header.Get("Authorization")
-
-		time.Sleep(gateway.PollingThrottle)
+		gateway.clock.Sleep(gateway.PollingThrottle)
 	}
 	return
 }

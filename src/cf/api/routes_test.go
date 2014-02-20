@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -323,7 +324,7 @@ func createRoutesRepo(requests ...testnet.TestRequest) (ts *httptest.Server, han
 
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	domainRepo = &testapi.FakeDomainRepository{}
 
 	repo = NewCloudControllerRouteRepository(configRepo, gateway, domainRepo)

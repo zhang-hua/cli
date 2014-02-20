@@ -8,6 +8,7 @@ import (
 	"cf/commands"
 	"cf/net"
 	"cf/trace"
+	"clocks"
 	"github.com/codegangsta/cli"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -38,9 +39,9 @@ var _ = Describe("App", func() {
 		manifestRepo := &testmanifest.FakeManifestRepository{}
 
 		repoLocator := api.NewRepositoryLocator(config, map[string]net.Gateway{
-			"auth":             net.NewUAAGateway(),
-			"cloud-controller": net.NewCloudControllerGateway(),
-			"uaa":              net.NewUAAGateway(),
+			"auth":             net.NewUAAGateway(clocks.New()),
+			"cloud-controller": net.NewCloudControllerGateway(clocks.New()),
+			"uaa":              net.NewUAAGateway(clocks.New()),
 		})
 
 		cmdFactory := commands.NewFactory(ui, config, manifestRepo, repoLocator)

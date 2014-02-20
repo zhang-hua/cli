@@ -16,6 +16,7 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
+	"clocks"
 )
 
 type cliDependencies struct {
@@ -45,9 +46,9 @@ func setupDependencies() (deps *cliDependencies) {
 	})
 
 	deps.apiRepoLocator = api.NewRepositoryLocator(deps.configRepo, map[string]net.Gateway{
-		"auth":             net.NewUAAGateway(),
-		"cloud-controller": net.NewCloudControllerGateway(),
-		"uaa":              net.NewUAAGateway(),
+		"auth":             net.NewUAAGateway(clocks.New()),
+		"cloud-controller": net.NewCloudControllerGateway(clocks.New()),
+		"uaa":              net.NewUAAGateway(clocks.New()),
 	})
 
 	return

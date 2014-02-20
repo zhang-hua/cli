@@ -5,6 +5,7 @@ import (
 	"cf/configuration"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	"encoding/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -97,7 +98,7 @@ func setupEventTest(requests []testnet.TestRequest) (deps eventTestDependencies)
 	configRepo.SetAccessToken("BEARER my_access_token")
 
 	deps.config = configRepo
-	deps.gateway = net.NewCloudControllerGateway()
+	deps.gateway = net.NewCloudControllerGateway(clocks.New())
 
 	return
 }

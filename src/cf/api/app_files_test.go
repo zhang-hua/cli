@@ -3,6 +3,7 @@ package api_test
 import (
 	. "cf/api"
 	"cf/net"
+	"clocks"
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -54,7 +55,7 @@ var _ = Describe("AppFilesRepository", func() {
 		configRepo := testconfig.NewRepositoryWithDefaults()
 		configRepo.SetApiEndpoint(listFilesRedirectServer.URL)
 
-		gateway := net.NewCloudControllerGateway()
+		gateway := net.NewCloudControllerGateway(clocks.New())
 		repo := NewCloudControllerAppFilesRepository(configRepo, gateway)
 		list, err := repo.ListFiles("my-app-guid", "some/path")
 

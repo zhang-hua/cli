@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -127,7 +128,7 @@ func createUserProvidedServiceInstanceRepo(req testnet.TestRequest) (ts *httptes
 	ts, handler = testnet.NewTLSServer([]testnet.TestRequest{req})
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCCUserProvidedServiceInstanceRepository(configRepo, gateway)
 	return
 }

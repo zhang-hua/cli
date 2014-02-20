@@ -2,6 +2,7 @@ package net_test
 
 import (
 	. "cf/net"
+	"clocks"
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -22,9 +23,15 @@ var invalidTokenCloudControllerRequest = func(writer http.ResponseWriter, reques
 }
 
 var _ = Describe("Testing with ginkgo", func() {
-	It("TestCloudControllerGatewayErrorHandling", func() {
-		gateway := NewCloudControllerGateway()
+	var (
+		gateway Gateway
+	)
 
+	BeforeEach(func() {
+		gateway = NewCloudControllerGateway(clocks.New())
+	})
+
+	It("TestCloudControllerGatewayErrorHandling", func() {
 		ts := httptest.NewTLSServer(http.HandlerFunc(failingCloudControllerRequest))
 		defer ts.Close()
 
@@ -37,10 +44,8 @@ var _ = Describe("Testing with ginkgo", func() {
 		Expect(apiResponse.Message).To(ContainSubstring("The host is taken: test1"))
 		Expect(apiResponse.ErrorCode).To(ContainSubstring("210003"))
 	})
+
 	It("TestCloudControllerGatewayInvalidTokenHandling", func() {
-
-		gateway := NewCloudControllerGateway()
-
 		ts := httptest.NewTLSServer(http.HandlerFunc(invalidTokenCloudControllerRequest))
 		defer ts.Close()
 

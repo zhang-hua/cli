@@ -5,6 +5,7 @@ import (
 	"cf/configuration"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -60,7 +61,7 @@ func createEndpointRepoForUpdate(config configuration.ReadWriter, endpoint func(
 	if endpoint != nil {
 		ts = httptest.NewTLSServer(http.HandlerFunc(endpoint))
 	}
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	return ts, NewEndpointRepository(config, gateway)
 }
 
@@ -68,7 +69,7 @@ func createInsecureEndpointRepoForUpdate(config configuration.ReadWriter, endpoi
 	if endpoint != nil {
 		ts = httptest.NewServer(http.HandlerFunc(endpoint))
 	}
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	return ts, NewEndpointRepository(config, gateway)
 }
 
@@ -188,7 +189,7 @@ var _ = Describe("Testing with ginkgo", func() {
 	It("TestGetCloudControllerEndpoint", func() {
 		config.SetApiEndpoint("http://api.example.com")
 
-		repo := NewEndpointRepository(config, net.NewCloudControllerGateway())
+		repo := NewEndpointRepository(config, net.NewCloudControllerGateway(clocks.New()))
 
 		endpoint, apiResponse := repo.GetCloudControllerEndpoint()
 
@@ -199,7 +200,7 @@ var _ = Describe("Testing with ginkgo", func() {
 	It("TestGetLoggregatorEndpoint", func() {
 		config.SetLoggregatorEndpoint("wss://loggregator.example.com:4443")
 
-		repo := NewEndpointRepository(config, net.NewCloudControllerGateway())
+		repo := NewEndpointRepository(config, net.NewCloudControllerGateway(clocks.New()))
 
 		endpoint, apiResponse := repo.GetLoggregatorEndpoint()
 
@@ -215,7 +216,7 @@ var _ = Describe("Testing with ginkgo", func() {
 		It("extrapolates the loggregator URL based on the API URL (SSL API)", func() {
 			config.SetApiEndpoint("https://api.run.pivotal.io")
 
-			repo := NewEndpointRepository(config, net.NewCloudControllerGateway())
+			repo := NewEndpointRepository(config, net.NewCloudControllerGateway(clocks.New()))
 
 			endpoint, apiResponse := repo.GetLoggregatorEndpoint()
 			Expect(apiResponse.IsSuccessful()).To(BeTrue())
@@ -225,7 +226,7 @@ var _ = Describe("Testing with ginkgo", func() {
 		It("extrapolates the loggregator URL based on the API URL (non-SSL API)", func() {
 			config.SetApiEndpoint("http://api.run.pivotal.io")
 
-			repo := NewEndpointRepository(config, net.NewCloudControllerGateway())
+			repo := NewEndpointRepository(config, net.NewCloudControllerGateway(clocks.New()))
 
 			endpoint, apiResponse := repo.GetLoggregatorEndpoint()
 			Expect(apiResponse.IsSuccessful()).To(BeTrue())
@@ -237,7 +238,7 @@ var _ = Describe("Testing with ginkgo", func() {
 		config := testconfig.NewRepository()
 		config.SetAuthorizationEndpoint("https://login.example.com")
 
-		repo := NewEndpointRepository(config, net.NewCloudControllerGateway())
+		repo := NewEndpointRepository(config, net.NewCloudControllerGateway(clocks.New()))
 
 		endpoint, apiResponse := repo.GetUAAEndpoint()
 
@@ -247,7 +248,7 @@ var _ = Describe("Testing with ginkgo", func() {
 
 	It("TestEndpointsReturnAnErrorWhenMissing", func() {
 		config := testconfig.NewRepository()
-		repo := NewEndpointRepository(config, net.NewCloudControllerGateway())
+		repo := NewEndpointRepository(config, net.NewCloudControllerGateway(clocks.New()))
 
 		_, response := repo.GetLoggregatorEndpoint()
 		Expect(response.IsNotSuccessful()).To(BeTrue())

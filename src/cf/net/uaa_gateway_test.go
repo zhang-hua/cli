@@ -2,6 +2,7 @@ package net_test
 
 import (
 	. "cf/net"
+	"clocks"
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -17,8 +18,7 @@ var failingUAARequest = func(writer http.ResponseWriter, request *http.Request) 
 
 var _ = Describe("Testing with ginkgo", func() {
 	It("TestUAAGatewayErrorHandling", func() {
-
-		gateway := NewUAAGateway()
+		gateway := NewUAAGateway(clocks.New())
 
 		ts := httptest.NewTLSServer(http.HandlerFunc(failingUAARequest))
 		defer ts.Close()

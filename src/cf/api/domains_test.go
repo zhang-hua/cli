@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -549,7 +550,7 @@ func createDomainRepo(reqs []testnet.TestRequest) (ts *httptest.Server, handler 
 	ts, handler = testnet.NewTLSServer(reqs)
 	config := testconfig.NewRepositoryWithDefaults()
 	config.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerDomainRepository(config, gateway)
 	return
 }

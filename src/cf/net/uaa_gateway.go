@@ -1,6 +1,7 @@
 package net
 
 import (
+	"clocks"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -28,6 +29,6 @@ var uaaErrorHandler = func(response *http.Response) errorResponse {
 	return errorResponse{Code: code, Description: uaaResp.Description}
 }
 
-func NewUAAGateway() Gateway {
-	return newGateway(uaaErrorHandler)
+func NewUAAGateway(clock clocks.Clock) Gateway {
+	return newGateway(clock, uaaErrorHandler)
 }

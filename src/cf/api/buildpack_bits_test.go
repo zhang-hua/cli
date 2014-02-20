@@ -7,6 +7,7 @@ import (
 	"cf/configuration"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"io"
@@ -14,8 +15,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"runtime"
 	"path/filepath"
+	"runtime"
 	"sort"
 	testconfig "testhelpers/configuration"
 	testnet "testhelpers/net"
@@ -30,7 +31,7 @@ var _ = Describe("BuildpackBitsRepository", func() {
 	)
 
 	BeforeEach(func() {
-		gateway := net.NewCloudControllerGateway()
+		gateway := net.NewCloudControllerGateway(clocks.New())
 		pwd, _ := os.Getwd()
 
 		buildpacksDir = filepath.Join(pwd, "../../fixtures/buildpacks")

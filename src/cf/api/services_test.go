@@ -5,6 +5,7 @@ import (
 	"cf/configuration"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -729,7 +730,7 @@ func createServiceRepoWithConfig(reqs []testnet.TestRequest, config configuratio
 		config.SetApiEndpoint(ts.URL)
 	}
 
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerServiceRepository(config, gateway)
 	return
 }

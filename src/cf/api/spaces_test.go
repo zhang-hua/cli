@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -279,7 +280,7 @@ func createSpacesRepo(reqs ...testnet.TestRequest) (ts *httptest.Server, handler
 	ts, handler = testnet.NewTLSServer(reqs)
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerSpaceRepository(configRepo, gateway)
 	return
 }

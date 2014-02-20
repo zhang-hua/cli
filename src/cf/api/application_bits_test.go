@@ -6,6 +6,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	"fileutils"
 	"fmt"
 	. "github.com/onsi/ginkgo"
@@ -202,7 +203,7 @@ func testUploadApp(dir string, requests []testnet.TestRequest) (app models.Appli
 
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	configRepo.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	gateway.PollingThrottle = time.Duration(0)
 	zipper := cf.ApplicationZipper{}
 	repo := NewCloudControllerApplicationBitsRepository(configRepo, gateway, zipper)
@@ -228,7 +229,7 @@ func testUploadApp(dir string, requests []testnet.TestRequest) (app models.Appli
 var _ = Describe("Testing with ginkgo", func() {
 	It("TestUploadWithInvalidDirectory", func() {
 		config := testconfig.NewRepository()
-		gateway := net.NewCloudControllerGateway()
+		gateway := net.NewCloudControllerGateway(clocks.New())
 		zipper := &cf.ApplicationZipper{}
 
 		repo := NewCloudControllerApplicationBitsRepository(config, gateway, zipper)

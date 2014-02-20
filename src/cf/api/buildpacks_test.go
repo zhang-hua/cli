@@ -4,6 +4,7 @@ import (
 	. "cf/api"
 	"cf/models"
 	"cf/net"
+	"clocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
@@ -333,7 +334,7 @@ func createBuildpackRepo(requests ...testnet.TestRequest) (ts *httptest.Server, 
 	ts, handler = testnet.NewTLSServer(requests)
 	config := testconfig.NewRepositoryWithDefaults()
 	config.SetApiEndpoint(ts.URL)
-	gateway := net.NewCloudControllerGateway()
+	gateway := net.NewCloudControllerGateway(clocks.New())
 	repo = NewCloudControllerBuildpackRepository(config, gateway)
 	return
 }

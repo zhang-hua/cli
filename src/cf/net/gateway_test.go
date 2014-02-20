@@ -5,6 +5,7 @@ import (
 	"cf/api"
 	"cf/configuration"
 	. "cf/net"
+	"clocks"
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -88,7 +89,7 @@ func createAuthenticationRepository(apiServer *httptest.Server, authServer *http
 	config.SetAccessToken("bearer initial-access-token")
 	config.SetRefreshToken("initial-refresh-token")
 
-	authGateway := NewUAAGateway()
+	authGateway := NewUAAGateway(clocks.New())
 	authenticator := api.NewUAAAuthenticationRepository(authGateway, config)
 
 	return config, authenticator
@@ -99,10 +100,12 @@ var _ = Describe("Testing with ginkgo", func() {
 	var uaaGateway Gateway
 	var config configuration.ReadWriter
 	var authRepo api.AuthenticationRepository
+	var clock clocks.FakeClock
 
 	BeforeEach(func() {
-		ccGateway = NewCloudControllerGateway()
-		uaaGateway = NewUAAGateway()
+		clock = clocks.NewFake(time.Now())
+		ccGateway = NewCloudControllerGateway(clock)
+		uaaGateway = NewUAAGateway(clocks.New())
 	})
 
 	It("TestNewRequest", func() {
@@ -138,7 +141,7 @@ var _ = Describe("Testing with ginkgo", func() {
 
 			config, authRepo = createAuthenticationRepository(apiServer, authServer)
 			ccGateway.SetTokenRefresher(authRepo)
-			ccGateway.PollingThrottle = 3 * time.Millisecond
+			ccGateway.PollingThrottle = 250 * time.Millisecond
 		})
 
 		AfterEach(func() {
@@ -147,17 +150,29 @@ var _ = Describe("Testing with ginkgo", func() {
 		})
 
 		It("returns the last response if the job completes before the timeout", func() {
+			waitChan := make(chan bool)
+			var apiResponse ApiResponse
+
 			go func() {
-				time.Sleep(25 * time.Millisecond)
-				jobStatus = "finished"
+				request, _ := ccGateway.NewRequest("GET", config.ApiEndpoint()+"/v2/foo", config.AccessToken(), nil)
+				_, apiResponse = ccGateway.PerformPollingRequestForJSONResponse(request, new(struct{}), 2*time.Second)
+				waitChan <- true
 			}()
 
-			request, _ := ccGateway.NewRequest("GET", config.ApiEndpoint()+"/v2/foo", config.AccessToken(), nil)
-			_, apiResponse := ccGateway.PerformPollingRequestForJSONResponse(request, new(struct{}), 100*time.Millisecond)
+			time.Sleep(3000	 * time.Millisecond)
+			clock.Advance(500 * time.Millisecond)
+			time.Sleep(1)
+			clock.Advance(500 * time.Millisecond)
+			<-waitChan
+
 			Expect(apiResponse.IsSuccessful()).To(BeTrue())
 		})
 
 		It("returns an error if jobs takes longer than the timeout", func() {
+			go func() {
+				time.Sleep(20*time.Millisecond)
+				clock.Advance(2*time.Second)
+			}()
 			request, _ := ccGateway.NewRequest("GET", config.ApiEndpoint()+"/v2/foo", config.AccessToken(), nil)
 			_, apiResponse := ccGateway.PerformPollingRequestForJSONResponse(request, new(struct{}), 10*time.Millisecond)
 			Expect(apiResponse.IsSuccessful()).To(BeFalse())
