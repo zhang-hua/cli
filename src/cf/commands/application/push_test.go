@@ -88,6 +88,12 @@ var _ = Describe("Push Command", func() {
 			testcmd.RunCommand(cmd, testcmd.NewContext("push", []string{}), reqFactory)
 			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 		})
+
+		FIt("fails when too many args are passed in", func() {
+			reqFactory := &testreq.FakeReqFactory{LoginSuccess: true, TargetedSpaceSuccess: true}
+			testcmd.Run("push", cmd, []string{"the-name", "-p", "fake-path", "extra-name-arg"}, reqFactory)
+			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
+		})
 	})
 
 	It("successfully pushes an app when the CC API only supports the old domains endpoints", func() {

@@ -5,11 +5,18 @@ import (
 	"github.com/codegangsta/cli"
 	testreq "testhelpers/requirements"
 	testterm "testhelpers/terminal"
+	"cf/app"
 )
 
 var CommandDidPassRequirements bool
 
-func RunCommand(cmd commands.Command, ctxt *cli.Context, reqFactory *testreq.FakeReqFactory) {
+type FakeRunner struct {
+	command commands.Command
+	requirementFactory *testreq.FakeReqFactory
+}
+
+func (fake FakeRunner) RunCmdByName(cmdName string, context *cli.Context) (err error) {
+	println("in runcmdbyname")
 	defer func() {
 		errMsg := recover()
 
@@ -20,7 +27,7 @@ func RunCommand(cmd commands.Command, ctxt *cli.Context, reqFactory *testreq.Fak
 
 	CommandDidPassRequirements = false
 
-	requirements, err := cmd.GetRequirements(reqFactory, ctxt)
+	requirements, err := fake.command.GetRequirements(fake.requirementFactory, context)
 	if err != nil {
 		return
 	}
@@ -33,7 +40,17 @@ func RunCommand(cmd commands.Command, ctxt *cli.Context, reqFactory *testreq.Fak
 	}
 
 	CommandDidPassRequirements = true
-	cmd.Run(ctxt)
+	fake.command.Run(context)
 
 	return
+}
+
+func RunCommand(cmd commands.Command, context *cli.Context, reqFactory *testreq.FakeReqFactory) {
+	FakeRunner{cmd, reqFactory}.RunCmdByName("command-name", context)
+}
+
+func Run(commandName string, cmd commands.Command, args []string, requirementFactory *testreq.FakeReqFactory) {
+	cmdRunner := FakeRunner{cmd, requirementFactory}
+	testApp, _ := app.NewApp(cmdRunner)
+	testApp.Run(append([]string{"cf", commandName}, args...))
 }
