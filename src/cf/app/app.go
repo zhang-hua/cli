@@ -84,6 +84,12 @@ func NewApp(cmdRunner command_runner.Runner, metadatas ...command_metadata.Comma
 }
 
 func getCommand(metadata command_metadata.CommandMetadata, runner command_runner.Runner) cli.Command {
+	if metadata.Name == "set-env" {
+		println("Metadata!")
+		println(fmt.Sprintf("%s", metadata.SkipFlagParsing))
+		println("Name!")
+		println(fmt.Sprintf("%s", metadata.Name))
+	}
 	return cli.Command{
 		Name:        metadata.Name,
 		ShortName:   metadata.ShortName,
@@ -92,6 +98,7 @@ func getCommand(metadata command_metadata.CommandMetadata, runner command_runner
 		Action: func(context *cli.Context) {
 			runner.RunCmdByName(metadata.Name, context)
 		},
-		Flags: metadata.Flags,
+		Flags:           metadata.Flags,
+		SkipFlagParsing: true,
 	}
 }

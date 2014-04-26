@@ -12,6 +12,7 @@ import (
 	testreq "testhelpers/requirements"
 	testterm "testhelpers/terminal"
 
+	"fmt"
 	. "testhelpers/matchers"
 )
 
@@ -123,6 +124,33 @@ var _ = Describe("set-env command", func() {
 			})
 		})
 
+		It("allows the variable value to begin with a hyphen", func() {
+			println("About to call set env")
+
+			//			args = []string{"my-app", "DATABASE_URL", "mysql://new-example.com/my-db"}
+			args = []string{"my-app", "MY_VAR", "--has-a-cool-value"}
+			ui := callSetEnv(args, requirementsFactory, appRepo)
+
+			println(ui.DumpOutputs())
+			Expect(len(ui.Outputs)).To(Equal(3))
+			Expect(ui.Outputs).To(ContainSubstrings(
+				[]string{
+					"Setting env variable",
+					"MY_VAR",
+					"--has-a-cool-value",
+				},
+				[]string{"OK"},
+				[]string{"TIP"},
+			))
+
+			Expect(requirementsFactory.ApplicationName).To(Equal("my-app"))
+			Expect(appRepo.UpdateAppGuid).To(Equal(app.Guid))
+			Expect(*appRepo.UpdateParams.EnvironmentVars).To(Equal(map[string]string{
+				"MY_VAR": "--has-a-cool-value",
+				"foo":    "bar",
+			}))
+		})
+
 		Context("when setting fails", func() {
 			BeforeEach(func() {
 				appRepo.UpdateErr = true
@@ -192,6 +220,7 @@ func callSetEnv(args []string, requirementsFactory *testreq.FakeReqFactory, appR
 	ctxt := testcmd.NewContext("set-env", args)
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewSetEnv(ui, configRepo, appRepo)
+	println(fmt.Sprintf("got a cmd %#v\n", cmd.Metadata()))
 	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
 	return
 }

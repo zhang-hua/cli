@@ -29,15 +29,18 @@ func NewSetEnv(ui terminal.UI, config configuration.Reader, appRepo api.Applicat
 
 func (command *SetEnv) Metadata() command_metadata.CommandMetadata {
 	return command_metadata.CommandMetadata{
-		Name:        "set-env",
-		ShortName:   "se",
-		Description: "Set an env variable for an app",
-		Usage:       "CF_NAME set-env APP NAME VALUE",
+		Name:            "set-env",
+		ShortName:       "se",
+		Description:     "Set an env variable for an app",
+		Usage:           "CF_NAME set-env APP NAME VALUE",
+		SkipFlagParsing: true,
 	}
 }
 
 func (cmd *SetEnv) GetRequirements(requirementsFactory requirements.Factory, c *cli.Context) (reqs []requirements.Requirement, err error) {
 	if len(c.Args()) < 3 {
+		println("args: %d", len(c.Args()))
+		println("args again: " + c.Args()[0])
 		err = errors.New("Incorrect Usage")
 		cmd.ui.FailWithUsage(c, "set-env")
 		return

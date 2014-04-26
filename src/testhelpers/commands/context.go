@@ -10,39 +10,45 @@ import (
 	"flag"
 	"fmt"
 	"github.com/codegangsta/cli"
-	"strings"
 	testconfig "testhelpers/configuration"
 	testreq "testhelpers/requirements"
 	testterm "testhelpers/terminal"
 )
 
-func NewContext(cmdName string, args []string) *cli.Context {
-	targetCommand := findCommand(cmdName)
+//func NewContext(cmdName string, args []string) *cli.Context {
+//	targetCommand := findCommand(cmdName)
+//
+//	flagSet := new(flag.FlagSet)
+//	for i, _ := range targetCommand.Flags {
+//		targetCommand.Flags[i].Apply(flagSet)
+//	}
+//
+//	// move all flag args to the beginning of the list, go requires them all upfront
+//	firstFlagIndex := -1
+//	for index, arg := range args {
+//		if strings.HasPrefix(arg, "-") {
+//			firstFlagIndex = index
+//			break
+//		}
+//	}
+//	if firstFlagIndex > 0 {
+//		args := args[0:firstFlagIndex]
+//		flags := args[firstFlagIndex:]
+//		flagSet.Parse(append(flags, args...))
+//	} else {
+//		flagSet.Parse(args[0:])
+//	}
+//
+//	globalSet := new(flag.FlagSet)
+//
+//	return cli.NewContext(cli.NewApp(), flagSet, globalSet)
+//}
 
+func NewContext(_ string, args []string) *cli.Context {
 	flagSet := new(flag.FlagSet)
-	for i, _ := range targetCommand.Flags {
-		targetCommand.Flags[i].Apply(flagSet)
-	}
+	_ = flagSet.Parse(args)
 
-	// move all flag args to the beginning of the list, go requires them all upfront
-	firstFlagIndex := -1
-	for index, arg := range args {
-		if strings.HasPrefix(arg, "-") {
-			firstFlagIndex = index
-			break
-		}
-	}
-	if firstFlagIndex > 0 {
-		args := args[0:firstFlagIndex]
-		flags := args[firstFlagIndex:]
-		flagSet.Parse(append(flags, args...))
-	} else {
-		flagSet.Parse(args[0:])
-	}
-
-	globalSet := new(flag.FlagSet)
-
-	return cli.NewContext(cli.NewApp(), flagSet, globalSet)
+	return cli.NewContext(cli.NewApp(), flagSet, flagSet)
 }
 
 func findCommand(cmdName string) (cmd cli.Command) {
@@ -66,5 +72,8 @@ func findCommand(cmdName string) (cmd cli.Command) {
 		}
 	}
 	panic(fmt.Sprintf("command %s does not exist", cmdName))
+
+	println("Got a command: " + cmd.Name)
+	println(fmt.Sprintf("Does it skip flag parsing? %s", cmd.SkipFlagParsing))
 	return
 }

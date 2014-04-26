@@ -88,7 +88,7 @@ var _ = Describe("delete-user command", func() {
 
 		It("deletes without confirmation when the -f flag is given", func() {
 			ui.Inputs = []string{}
-			runCommand("-f", "user-name")
+			runCommand("user-name", "-f")
 
 			Expect(ui.Outputs).To(ContainSubstrings(
 				[]string{"Deleting user", "user-name"},
@@ -106,7 +106,7 @@ var _ = Describe("delete-user command", func() {
 		})
 
 		It("prints a warning", func() {
-			runCommand("-f", "user-name")
+			runCommand("user-name", "-f")
 
 			Expect(ui.Outputs).To(ContainSubstrings(
 				[]string{"Deleting user", "user-name"},
