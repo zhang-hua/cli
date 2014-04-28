@@ -5,6 +5,7 @@ import (
 	"cf/configuration"
 	"cf/errors"
 	"code.google.com/p/gogoprotobuf/proto"
+	"github.com/XenoPhex/loggregator_consumer"
 	"github.com/cloudfoundry/loggregatorlib/logmessage"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

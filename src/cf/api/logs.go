@@ -4,7 +4,7 @@ import (
 	"cf/configuration"
 	"crypto/tls"
 	"errors"
-	consumer "github.com/cloudfoundry/loggregator_consumer"
+	consumer "github.com/XenoPhex/loggregator_consumer"
 	"github.com/cloudfoundry/loggregatorlib/logmessage"
 	"time"
 )

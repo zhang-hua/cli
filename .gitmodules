@@ -28,3 +28,6 @@
 [submodule "src/github.com/gorilla/websocket"]
 	path = src/github.com/gorilla/websocket
 	url = https://github.com/gorilla/websocket
+[submodule "src/github.com/XenoPhex/loggregator_consumer"]
+	path = src/github.com/XenoPhex/loggregator_consumer
+	url = git@github.com:XenoPhex/loggregator_consumer.git
