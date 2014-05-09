@@ -20,7 +20,7 @@ func callListServiceBrokers(args []string, serviceBrokerRepo *testapi.FakeServic
 	config := testconfig.NewRepositoryWithDefaults()
 	ctxt := testcmd.NewContext("service-brokers", args)
 	cmd := NewListServiceBrokers(ui, config, serviceBrokerRepo)
-	testcmd.RunCommand(cmd, ctxt, &testreq.FakeReqFactory{})
+	testcmd.RunCommand(cmd, args, &testreq.FakeReqFactory{})
 
 	return
 }
@@ -46,7 +46,7 @@ var _ = Describe("service-brokers command", func() {
 		It("fails if the user is not logged in", func() {
 			requirementsFactory.LoginSuccess = false
 			ctxt := testcmd.NewContext("service-brokers", []string{})
-			testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+			testcmd.RunCommand(cmd, args, requirementsFactory)
 			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 		})
 	})
@@ -67,7 +67,7 @@ var _ = Describe("service-brokers command", func() {
 		}}
 
 		context := testcmd.NewContext("service-brokers", []string{})
-		testcmd.RunCommand(cmd, context, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 
 		Expect(ui.Outputs).To(ContainSubstrings(
 			[]string{"Getting service brokers as", "my-user"},
@@ -80,7 +80,7 @@ var _ = Describe("service-brokers command", func() {
 
 	It("says when no service brokers were found", func() {
 		context := testcmd.NewContext("service-brokers", []string{})
-		testcmd.RunCommand(cmd, context, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 
 		Expect(ui.Outputs).To(ContainSubstrings(
 			[]string{"Getting service brokers as", "my-user"},
@@ -91,7 +91,7 @@ var _ = Describe("service-brokers command", func() {
 	It("reports errors when listing service brokers", func() {
 		repo.ListErr = true
 		context := testcmd.NewContext("service-brokers", []string{})
-		testcmd.RunCommand(cmd, context, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 
 		Expect(ui.Outputs).To(ContainSubstrings(
 			[]string{"Getting service brokers as ", "my-user"},

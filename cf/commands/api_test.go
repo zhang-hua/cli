@@ -24,7 +24,7 @@ func callApi(args []string, config configuration.ReadWriter, endpointRepo *testa
 	cmd := NewApi(ui, config, endpointRepo)
 	ctxt := testcmd.NewContext("api", args)
 	requirementsFactory := &testreq.FakeReqFactory{}
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 
@@ -71,7 +71,7 @@ var _ = Describe("api command", func() {
 			})
 
 			JustBeforeEach(func() {
-				testcmd.RunCommand(NewApi(ui, config, endpointRepo), ctx, requirementsFactory)
+				testcmd.RunCommand(NewApi(ui, config, endpointRepo), args, requirementsFactory)
 			})
 
 			It("prints out the api endpoint", func() {

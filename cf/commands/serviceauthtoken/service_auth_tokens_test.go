@@ -46,7 +46,7 @@ func callListServiceAuthTokens(requirementsFactory *testreq.FakeReqFactory, auth
 
 	cmd := NewListServiceAuthTokens(ui, config, authTokenRepo)
 	ctxt := testcmd.NewContext("service-auth-tokens", []string{})
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 
 	return
 }

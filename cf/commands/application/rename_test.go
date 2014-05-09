@@ -83,6 +83,6 @@ func callRename(args []string, requirementsFactory *testreq.FakeReqFactory, appR
 
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewRenameApp(ui, configRepo, appRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

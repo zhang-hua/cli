@@ -47,7 +47,7 @@ func callSpaceUsers(args []string, requirementsFactory *testreq.FakeReqFactory, 
 	cmd := NewSpaceUsers(ui, config, spaceRepo, userRepo)
 	ctxt := testcmd.NewContext("space-users", args)
 
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

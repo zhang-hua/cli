@@ -34,7 +34,7 @@ var _ = Describe("stacks command", func() {
 		It("fails if the user is not logged in", func() {
 			requirementsFactory.LoginSuccess = false
 			context := testcmd.NewContext("stacks", []string{})
-			testcmd.RunCommand(cmd, context, requirementsFactory)
+			testcmd.RunCommand(cmd, args, requirementsFactory)
 			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 		})
 	})
@@ -51,7 +51,7 @@ var _ = Describe("stacks command", func() {
 
 		repo.FindAllStacks = []models.Stack{stack1, stack2}
 		context := testcmd.NewContext("stacks", []string{})
-		testcmd.RunCommand(cmd, context, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 
 		Expect(ui.Outputs).To(ContainSubstrings(
 			[]string{"Getting stacks in org", "my-org", "my-space", "my-user"},

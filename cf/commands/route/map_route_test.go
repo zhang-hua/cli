@@ -46,7 +46,7 @@ func callMapRoute(args []string, requirementsFactory *testreq.FakeReqFactory, ro
 
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewMapRoute(ui, configRepo, routeRepo, createRoute)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

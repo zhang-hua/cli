@@ -214,6 +214,6 @@ func callSetEnv(args []string, requirementsFactory *testreq.FakeReqFactory, appR
 	ctxt := testcmd.NewContext("set-env", args)
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewSetEnv(ui, configRepo, appRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

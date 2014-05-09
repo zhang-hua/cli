@@ -43,7 +43,7 @@ func callUpdateBuildpack(args []string, requirementsFactory *testreq.FakeReqFact
 	ctxt := testcmd.NewContext("update-buildpack", args)
 
 	cmd := NewUpdateBuildpack(ui, fakeRepo, fakeBitsRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

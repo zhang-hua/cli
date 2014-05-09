@@ -45,7 +45,7 @@ func callShowSpace(args []string, requirementsFactory *testreq.FakeReqFactory) (
 	config := testconfig.NewRepositoryWithDefaults()
 
 	cmd := NewShowSpace(ui, config)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

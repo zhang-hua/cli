@@ -80,6 +80,6 @@ func callShareDomain(args []string, requirementsFactory *testreq.FakeReqFactory,
 	ctxt := testcmd.NewContext("create-shared-domain", args)
 	configRepo := testconfig.NewRepositoryWithAccessToken(configuration.TokenInfo{Username: "my-user"})
 	cmd := NewCreateSharedDomain(fakeUI, configRepo, domainRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

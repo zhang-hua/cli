@@ -109,6 +109,6 @@ func callUnsetOrgRole(args []string, userRepo *testapi.FakeUserRepository, requi
 	configRepo := testconfig.NewRepositoryWithDefaults()
 
 	cmd := NewUnsetOrgRole(ui, configRepo, userRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

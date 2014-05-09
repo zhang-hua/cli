@@ -94,6 +94,6 @@ func callCreateDomain(args []string, requirementsFactory *testreq.FakeReqFactory
 
 	cmd := domain.NewCreateDomain(fakeUI, configRepo, domainRepo)
 
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

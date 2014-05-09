@@ -110,6 +110,6 @@ func callDeleteOrphanedRoutes(confirmation string, args []string, reqFactory *te
 
 	cmd := NewDeleteOrphanedRoutes(ui, configRepo, routeRepo)
 
-	testcmd.RunCommand(cmd, ctxt, reqFactory)
+	testcmd.RunCommand(cmd, args, reqFactory)
 	return
 }

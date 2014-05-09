@@ -47,7 +47,7 @@ func callOrgUsers(args []string, requirementsFactory *testreq.FakeReqFactory, us
 	cmd := NewOrgUsers(ui, config, userRepo)
 	ctxt := testcmd.NewContext("org-users", args)
 
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

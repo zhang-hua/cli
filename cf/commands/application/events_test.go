@@ -1,7 +1,7 @@
 package application_test
 
 import (
-	. "github.com/cloudfoundry/cli/cf/commands/application"
+	"github.com/cloudfoundry/cli/cf/configuration"
 	"github.com/cloudfoundry/cli/cf/errors"
 	"github.com/cloudfoundry/cli/cf/models"
 	testapi "github.com/cloudfoundry/cli/testhelpers/api"
@@ -9,16 +9,18 @@ import (
 	testconfig "github.com/cloudfoundry/cli/testhelpers/configuration"
 	testreq "github.com/cloudfoundry/cli/testhelpers/requirements"
 	testterm "github.com/cloudfoundry/cli/testhelpers/terminal"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"time"
 
+	. "github.com/cloudfoundry/cli/cf/commands/application"
 	. "github.com/cloudfoundry/cli/testhelpers/matchers"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("events command", func() {
 	var (
 		requirementsFactory *testreq.FakeReqFactory
+		configRepo          configuration.ReadWriter
 		eventsRepo          *testapi.FakeAppEventsRepo
 		ui                  *testterm.FakeUI
 	)
@@ -27,14 +29,14 @@ var _ = Describe("events command", func() {
 
 	BeforeEach(func() {
 		eventsRepo = &testapi.FakeAppEventsRepo{}
+		configRepo = testconfig.NewRepositoryWithDefaults()
 		requirementsFactory = &testreq.FakeReqFactory{LoginSuccess: true, TargetedSpaceSuccess: true}
 		ui = new(testterm.FakeUI)
 	})
 
 	runCommand := func(args ...string) {
-		configRepo := testconfig.NewRepositoryWithDefaults()
 		cmd := NewEvents(ui, configRepo, eventsRepo)
-		testcmd.RunCommand(cmd, testcmd.NewContext("events", args), requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
 
 	It("fails with usage when called without an app name", func() {

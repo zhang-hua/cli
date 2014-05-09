@@ -57,7 +57,7 @@ func callCreateOrg(args []string, requirementsFactory *testreq.FakeReqFactory, o
 
 	cmd := NewCreateOrg(fakeUI, config, orgRepo)
 
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

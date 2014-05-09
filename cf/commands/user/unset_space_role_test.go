@@ -53,7 +53,7 @@ func callUnsetSpaceRole(args []string, spaceRepo *testapi.FakeSpaceRepository, u
 	config := testconfig.NewRepositoryWithDefaults()
 
 	cmd := NewUnsetSpaceRole(ui, config, spaceRepo, userRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

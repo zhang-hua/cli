@@ -120,7 +120,7 @@ func callPassword(inputs []string, deps passwordDeps) (ui *testterm.FakeUI) {
 
 	ctxt := testcmd.NewContext("passwd", []string{})
 	cmd := NewPassword(ui, deps.PwdRepo, deps.Config)
-	testcmd.RunCommand(cmd, ctxt, deps.ReqFactory)
+	testcmd.RunCommand(cmd, args, deps.ReqFactory)
 
 	return
 }

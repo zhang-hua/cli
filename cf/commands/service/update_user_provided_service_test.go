@@ -47,7 +47,7 @@ func callUpdateUserProvidedService(args []string, requirementsFactory *testreq.F
 	config := testconfig.NewRepositoryWithDefaults()
 
 	cmd := NewUpdateUserProvidedService(fakeUI, config, userProvidedServiceInstanceRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

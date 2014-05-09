@@ -96,7 +96,7 @@ func callEnv(args []string, requirementsFactory *testreq.FakeReqFactory) (ui *te
 
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewEnv(ui, configRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 
 	return
 }

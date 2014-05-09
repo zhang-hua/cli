@@ -199,6 +199,6 @@ func callCreateRoute(args []string, requirementsFactory *testreq.FakeReqFactory,
 
 	cmd := NewCreateRoute(fakeUI, configRepo, routeRepo)
 
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

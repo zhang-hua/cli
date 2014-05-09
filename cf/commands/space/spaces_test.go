@@ -46,7 +46,7 @@ func callSpaces(args []string, requirementsFactory *testreq.FakeReqFactory, conf
 	ctxt := testcmd.NewContext("spaces", args)
 
 	cmd := NewListSpaces(ui, config, spaceRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 
