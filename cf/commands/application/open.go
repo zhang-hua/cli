@@ -1,6 +1,7 @@
 package application
 
 import (
+	"github.com/cloudfoundry/cli/cf/api/application_opener"
 	"github.com/cloudfoundry/cli/cf/command_metadata"
 	"github.com/cloudfoundry/cli/cf/requirements"
 	"github.com/cloudfoundry/cli/cf/terminal"
@@ -9,11 +10,12 @@ import (
 
 type openAppCommand struct {
 	ui     terminal.UI
+	urlOpener application_opener.URLOpener
 	appReq requirements.ApplicationRequirement
 }
 
-func NewOpenApp(ui terminal.UI) *openAppCommand {
-	return &openAppCommand{ui: ui}
+func NewOpenApp(ui terminal.UI, urlOpener application_opener.URLOpener) *openAppCommand {
+	return &openAppCommand{ui: ui, urlOpener: urlOpener}
 }
 
 func (cmd *openAppCommand) Metadata() command_metadata.CommandMetadata {
@@ -36,5 +38,6 @@ func (cmd *openAppCommand) GetRequirements(requirementsFactory requirements.Fact
 }
 
 func (cmd *openAppCommand) Run(context *cli.Context) {
-
+	app := cmd.appReq.GetApplication()
+	cmd.urlOpener.u
 }

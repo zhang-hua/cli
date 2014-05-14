@@ -2,6 +2,7 @@ package api
 
 import (
 	"crypto/tls"
+	"github.com/cloudfoundry/cli/cf/api/application_opener"
 	"github.com/cloudfoundry/cli/cf/api/strategy"
 	"github.com/cloudfoundry/cli/cf/app_files"
 	"github.com/cloudfoundry/cli/cf/configuration"
@@ -36,6 +37,7 @@ type RepositoryLocator struct {
 	userProvidedServiceInstanceRepo CCUserProvidedServiceInstanceRepository
 	buildpackRepo                   CloudControllerBuildpackRepository
 	buildpackBitsRepo               CloudControllerBuildpackBitsRepository
+	urlOpener                       application_opener.URLOpener
 }
 
 func NewRepositoryLocator(config configuration.ReadWriter, gatewaysByName map[string]net.Gateway) (loc RepositoryLocator) {
@@ -78,6 +80,7 @@ func NewRepositoryLocator(config configuration.ReadWriter, gatewaysByName map[st
 	loc.userRepo = NewCloudControllerUserRepository(config, uaaGateway, cloudControllerGateway)
 	loc.buildpackRepo = NewCloudControllerBuildpackRepository(config, cloudControllerGateway)
 	loc.buildpackBitsRepo = NewCloudControllerBuildpackBitsRepository(config, cloudControllerGateway, app_files.ApplicationZipper{})
+	loc.urlOpener = application_opener.NewURLOpener(application_opener.RealCommandProvider{})
 
 	return
 }
@@ -184,4 +187,8 @@ func (locator RepositoryLocator) GetBuildpackRepository() BuildpackRepository {
 
 func (locator RepositoryLocator) GetBuildpackBitsRepository() BuildpackBitsRepository {
 	return locator.buildpackBitsRepo
+}
+
+func (locator RepositoryLocator) GetURLOpener() application_opener.URLOpener {
+	return locator.urlOpener
 }

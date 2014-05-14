@@ -2,6 +2,7 @@ package application_test
 
 import (
 	"github.com/cloudfoundry/cli/cf/models"
+	testopener "github.com/cloudfoundry/cli/testhelpers/api/url_opener"
 	testcmd "github.com/cloudfoundry/cli/testhelpers/commands"
 	testreq "github.com/cloudfoundry/cli/testhelpers/requirements"
 	testterm "github.com/cloudfoundry/cli/testhelpers/terminal"
@@ -12,19 +13,21 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("open command", func() {
+var _ = FDescribe("open command", func() {
 	var (
 		ui                  *testterm.FakeUI
 		requirementsFactory *testreq.FakeReqFactory
+		urlOpener           *testopener.FakeURLOpener
 	)
 
 	BeforeEach(func() {
 		ui = new(testterm.FakeUI)
 		requirementsFactory = new(testreq.FakeReqFactory)
+		urlOpener = new(testopener.FakeURLOpener)
 	})
 
 	runCommand := func(args ...string) {
-		cmd := NewOpenApp(ui)
+		cmd := NewOpenApp(ui, urlOpener)
 		testcmd.RunCommand(cmd, testcmd.NewContext(cmd.Metadata().Name, args), requirementsFactory)
 	}
 
@@ -38,15 +41,24 @@ var _ = Describe("open command", func() {
 			requirementsFactory.AppNotFound = false
 
 			app := models.Application{}
-			app.Name = "sweet-app-i-wrote"
+			app.Name = "my-app"
+			app.Routes = []models.RouteSummary{
+				models.RouteSummary{
+					Host: "my-app",
+					Domain: models.DomainFields{
+						Name: "run.pivotal.io",
+					},
+				},
+			}
 			requirementsFactory.Application = app
 		})
 
 		It("opens the app with that name when it exists", func() {
-			runCommand("sweet-app-i-wrote")
+			runCommand("my-app")
 
-			Expect(requirementsFactory.ApplicationName).To(Equal("sweet-app-i-wrote"))
+			Expect(requirementsFactory.ApplicationName).To(Equal("my-app"))
 			Expect(ui.FailedWithUsage).To(BeFalse())
+			Expect(urlOpener.OpenURLReceived.URL).To(Equal("my-app.run.pivotal.io"))
 		})
 	})
 
