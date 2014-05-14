@@ -8,6 +8,7 @@ import (
 type FakeReqFactory struct {
 	ApplicationName string
 	Application     models.Application
+	AppNotFound     bool
 
 	ServiceInstanceName string
 	ServiceInstance     models.ServiceInstance
@@ -41,7 +42,7 @@ type FakeReqFactory struct {
 
 func (f *FakeReqFactory) NewApplicationRequirement(name string) requirements.ApplicationRequirement {
 	f.ApplicationName = name
-	return FakeRequirement{f, true}
+	return FakeRequirement{f, !f.AppNotFound}
 }
 
 func (f *FakeReqFactory) NewServiceInstanceRequirement(name string) requirements.ServiceInstanceRequirement {
