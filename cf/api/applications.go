@@ -17,6 +17,7 @@ type ApplicationRepository interface {
 	Read(name string) (app models.Application, apiErr error)
 	Update(appGuid string, params models.AppParams) (updatedApp models.Application, apiErr error)
 	Delete(appGuid string) (apiErr error)
+	ReadEnv(guid string) (appRes SystemEnvResource, apiErr error)
 }
 
 type CloudControllerApplicationRepository struct {
@@ -63,6 +64,24 @@ func (repo CloudControllerApplicationRepository) Read(name string) (app models.A
 
 	res := appResources.Resources[0]
 	app = res.ToModel()
+	return
+}
+
+type SystemEnvResource struct {
+	System      interface{}        `json:"system_env_json,omitempty"`
+	Environment *map[string]string `json:"environment_json,omitempty"`
+}
+
+func (repo CloudControllerApplicationRepository) ReadEnv(guid string) (appRes SystemEnvResource, apiErr error) {
+	path := fmt.Sprintf("%s/v2/apps/%s/env", repo.config.ApiEndpoint(), guid)
+	appResource := new(SystemEnvResource)
+	apiErr = repo.gateway.GetResource(path, appResource)
+	if apiErr != nil {
+		return
+	}
+
+	appRes = *appResource
+
 	return
 }
 

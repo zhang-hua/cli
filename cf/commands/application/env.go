@@ -53,16 +53,35 @@ func (cmd *Env) Run(c *cli.Context) {
 		terminal.EntityNameColor(cmd.config.SpaceFields().Name),
 		terminal.EntityNameColor(cmd.config.Username()),
 	)
-	envVars := app.EnvironmentVars
 
-	cmd.ui.Ok()
-	cmd.ui.Say("")
+	// call endpoint
+	resource, envResourceErr := cmd.appRepo.ReadEnv(app.Guid)
+	if envResourceErr != nil {
+		envVars := app.EnvironmentVars
 
-	if len(envVars) == 0 {
-		cmd.ui.Say("No env variables exist")
-		return
-	}
-	for key, value := range envVars {
-		cmd.ui.Say("%s: %s", key, terminal.EntityNameColor(value))
+		cmd.ui.Ok()
+		cmd.ui.Say("")
+
+		if len(envVars) == 0 {
+			cmd.ui.Say("No env variables exist")
+			return
+		}
+		for key, value := range envVars {
+			cmd.ui.Say("%s: %s", key, terminal.EntityNameColor(value))
+		}
+	} else {
+		//system := resource.System
+		environmentVars := resource.Environment
+
+		cmd.ui.Ok()
+		cmd.ui.Say("")
+
+		if len(*environmentVars) == 0 {
+			cmd.ui.Say("No env variables exist")
+			return
+		}
+		for key, value := range *environmentVars {
+			cmd.ui.Say("%s: %s", key, terminal.EntityNameColor(value))
+		}
 	}
 }
