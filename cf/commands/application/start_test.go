@@ -26,6 +26,9 @@
 package application_test
 
 import (
+	"os"
+	"time"
+
 	"github.com/cloudfoundry/cli/cf/api"
 	. "github.com/cloudfoundry/cli/cf/commands/application"
 	"github.com/cloudfoundry/cli/cf/configuration"
@@ -40,8 +43,6 @@ import (
 	"github.com/cloudfoundry/loggregatorlib/logmessage"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"os"
-	"time"
 
 	. "github.com/cloudfoundry/cli/testhelpers/matchers"
 )
@@ -376,14 +377,13 @@ var _ = Describe("start command", func() {
 
 func callStart(args []string, config configuration.Reader, requirementsFactory *testreq.FakeReqFactory, displayApp ApplicationDisplayer, appRepo api.ApplicationRepository, appInstancesRepo api.AppInstancesRepository, logRepo api.LogsRepository) (ui *testterm.FakeUI) {
 	ui = new(testterm.FakeUI)
-	ctxt := testcmd.NewContext("start", args)
 
 	cmd := NewStart(ui, config, displayApp, appRepo, appInstancesRepo, logRepo)
 	cmd.StagingTimeout = 50 * time.Millisecond
 	cmd.StartupTimeout = 50 * time.Millisecond
 	cmd.PingerThrottle = 50 * time.Millisecond
 
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand2(cmd, args, requirementsFactory)
 	return
 }
 

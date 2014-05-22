@@ -38,7 +38,7 @@ var _ = Describe("migrating service instances from v1 to v2", func() {
 	Describe("requirements", func() {
 		It("requires you to be logged in", func() {
 			context = testcmd.NewContext("migrate-service-instances", args)
-			testcmd.RunCommand(cmd, context, requirementsFactory)
+			testcmd.RunCommand2(cmd, args, requirementsFactory)
 
 			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 		})

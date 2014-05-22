@@ -2,6 +2,7 @@ package commands_test
 
 import (
 	"fmt"
+
 	"github.com/cloudfoundry/cli/cf"
 	. "github.com/cloudfoundry/cli/cf/commands"
 	"github.com/cloudfoundry/cli/cf/configuration"
@@ -22,9 +23,8 @@ func callApi(args []string, config configuration.ReadWriter, endpointRepo *testa
 	ui = new(testterm.FakeUI)
 
 	cmd := NewApi(ui, config, endpointRepo)
-	ctxt := testcmd.NewContext("api", args)
 	requirementsFactory := &testreq.FakeReqFactory{}
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand2(cmd, args, requirementsFactory)
 	return
 }
 

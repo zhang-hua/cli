@@ -18,9 +18,8 @@ import (
 func callListServiceBrokers(args []string, serviceBrokerRepo *testapi.FakeServiceBrokerRepo) (ui *testterm.FakeUI) {
 	ui = &testterm.FakeUI{}
 	config := testconfig.NewRepositoryWithDefaults()
-	ctxt := testcmd.NewContext("service-brokers", args)
 	cmd := NewListServiceBrokers(ui, config, serviceBrokerRepo)
-	testcmd.RunCommand(cmd, ctxt, &testreq.FakeReqFactory{})
+	testcmd.RunCommand2(cmd, args, &testreq.FakeReqFactory{})
 
 	return
 }

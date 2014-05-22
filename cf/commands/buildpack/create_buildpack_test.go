@@ -32,9 +32,7 @@ var _ = Describe("create-buildpack command", func() {
 
 	It("fails requirements when the user is not logged in", func() {
 		requirementsFactory.LoginSuccess = false
-		context := testcmd.NewContext("create-buildpack", []string{"my-buildpack", "my-dir", "0"})
-		testcmd.RunCommand(cmd, context, requirementsFactory)
-
+		testcmd.RunCommand2(cmd, []string{"my-buildpack", "my-dir", "0"}, requirementsFactory)
 		Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 	})
 

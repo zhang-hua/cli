@@ -38,8 +38,7 @@ var _ = Describe("auth command", func() {
 
 	Describe("requirements", func() {
 		It("fails with usage when given too few arguments", func() {
-			context := testcmd.NewContext("auth", []string{})
-			testcmd.RunCommand(cmd, context, requirementsFactory)
+			testcmd.RunCommand2(cmd, []string{}, requirementsFactory)
 
 			Expect(ui.FailedWithUsage).To(BeTrue())
 		})

@@ -34,8 +34,7 @@ var _ = Describe("create-user-provided-service command", func() {
 	Describe("login requirements", func() {
 		It("fails if the user is not logged in", func() {
 			requirementsFactory.LoginSuccess = false
-			ctxt := testcmd.NewContext("create-user-provided-service", []string{"my-service"})
-			testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+			testcmd.RunCommand2(cmd, []string{"my-service"}, requirementsFactory)
 			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 		})
 	})

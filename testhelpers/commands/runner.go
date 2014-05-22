@@ -38,3 +38,35 @@ func RunCommand(cmd command.Command, ctxt *cli.Context, requirementsFactory *tes
 
 	return
 }
+
+func RunCommand2(cmd command.Command, args []string, requirementsFactory *testreq.FakeReqFactory) (passedRequirements bool) {
+	context := NewContext(cmd.Metadata().Name, args)
+
+	defer func() {
+		errMsg := recover()
+
+		if errMsg != nil && errMsg != testterm.FailedWasCalled {
+			panic(errMsg)
+		}
+	}()
+
+	CommandDidPassRequirements = false
+
+	requirements, err := cmd.GetRequirements(requirementsFactory, context)
+	if err != nil {
+		return
+	}
+
+	for _, requirement := range requirements {
+		success := requirement.Execute()
+		if !success {
+			return
+		}
+	}
+
+	passedRequirements = true
+	CommandDidPassRequirements = true
+	cmd.Run(context)
+
+	return
+}

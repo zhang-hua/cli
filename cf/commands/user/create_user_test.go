@@ -34,9 +34,8 @@ var _ = Describe("Create user command", func() {
 	})
 
 	runCommand := func(args ...string) {
-		ctxt := testcmd.NewContext("create-user", args)
 		cmd := NewCreateUser(ui, configRepo, userRepo)
-		testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+		testcmd.RunCommand2(cmd, args, requirementsFactory)
 		return
 	}
 

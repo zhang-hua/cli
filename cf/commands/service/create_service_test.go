@@ -49,8 +49,7 @@ var _ = Describe("create-service command", func() {
 	})
 
 	var callCreateService = func(args []string) {
-		ctxt := testcmd.NewContext("create-service", args)
-		testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+		testcmd.RunCommand2(cmd, args, requirementsFactory)
 	}
 
 	Describe("requirements", func() {
