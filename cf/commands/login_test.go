@@ -99,7 +99,7 @@ var _ = Describe("Login Command", func() {
 				ui.Inputs = []string{"api.example.com", "user@example.com", "password", OUT_OF_RANGE_CHOICE, "2", OUT_OF_RANGE_CHOICE, "1"}
 
 				l := NewLogin(ui, Config, authRepo, endpointRepo, orgRepo, spaceRepo)
-				testcmd.RunCommand(l, testcmd.NewContext("login", Flags), nil)
+				testcmd.RunCommand2(l, Flags, nil)
 
 				Expect(ui.Outputs).To(ContainSubstrings(
 					[]string{"Select an org"},
