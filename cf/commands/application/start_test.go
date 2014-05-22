@@ -99,7 +99,7 @@ var _ = Describe("start command", func() {
 	It("fails requirements when not logged in", func() {
 		requirementsFactory.LoginSuccess = false
 		cmd := NewStart(new(testterm.FakeUI), testconfig.NewRepository(), &testcmd.FakeAppDisplayer{}, &testapi.FakeApplicationRepository{}, &testapi.FakeAppInstancesRepo{}, &testapi.FakeLogsRepository{})
-		testcmd.RunCommand(cmd, testcmd.NewContext("start", []string{"some-app-name"}), requirementsFactory)
+		testcmd.RunCommand2(cmd, []string{"some-app-name"}, requirementsFactory)
 		Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 	})
 

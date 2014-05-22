@@ -44,9 +44,7 @@ var _ = Describe("auth command", func() {
 		})
 
 		It("fails if the user has not set an api endpoint", func() {
-			context := testcmd.NewContext("auth", []string{"username", "password"})
-			testcmd.RunCommand(cmd, context, requirementsFactory)
-
+			testcmd.RunCommand2(cmd, []string{"username", "password"}, requirementsFactory)
 			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 		})
 	})
@@ -59,8 +57,7 @@ var _ = Describe("auth command", func() {
 
 		It("authenticates successfully", func() {
 			requirementsFactory.ApiEndpointSuccess = true
-			context := testcmd.NewContext("auth", []string{"foo@example.com", "password"})
-			testcmd.RunCommand(cmd, context, requirementsFactory)
+			testcmd.RunCommand2(cmd, []string{"foo@example.com", "password"}, requirementsFactory)
 
 			Expect(ui.FailedWithUsage).To(BeFalse())
 			Expect(ui.Outputs).To(ContainSubstrings(
@@ -78,14 +75,14 @@ var _ = Describe("auth command", func() {
 
 		It("gets the UAA endpoint and saves it to the config file", func() {
 			requirementsFactory.ApiEndpointSuccess = true
-			testcmd.RunCommand(cmd, testcmd.NewContext("auth", []string{"foo@example.com", "password"}), requirementsFactory)
+			testcmd.RunCommand2(cmd, []string{"foo@example.com", "password"}, requirementsFactory)
 			Expect(repo.GetLoginPromptsWasCalled).To(BeTrue())
 		})
 
 		Describe("when authentication fails", func() {
 			BeforeEach(func() {
 				repo.AuthError = true
-				testcmd.RunCommand(cmd, testcmd.NewContext("auth", []string{"username", "password"}), requirementsFactory)
+				testcmd.RunCommand2(cmd, []string{"username", "password"}, requirementsFactory)
 			})
 
 			It("does not prompt the user when provided username and password", func() {

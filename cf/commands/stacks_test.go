@@ -49,8 +49,7 @@ var _ = Describe("stacks command", func() {
 		}
 
 		repo.FindAllStacks = []models.Stack{stack1, stack2}
-		context := testcmd.NewContext("stacks", []string{})
-		testcmd.RunCommand(cmd, context, requirementsFactory)
+		testcmd.RunCommand2(cmd, []string{}, requirementsFactory)
 
 		Expect(ui.Outputs).To(ContainSubstrings(
 			[]string{"Getting stacks in org", "my-org", "my-space", "my-user"},

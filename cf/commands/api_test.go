@@ -12,7 +12,6 @@ import (
 	testconfig "github.com/cloudfoundry/cli/testhelpers/configuration"
 	testreq "github.com/cloudfoundry/cli/testhelpers/requirements"
 	testterm "github.com/cloudfoundry/cli/testhelpers/terminal"
-	"github.com/codegangsta/cli"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -56,7 +55,6 @@ var _ = Describe("api command", func() {
 		Context("when the endpoint is set in the config", func() {
 			var (
 				ui                  *testterm.FakeUI
-				ctx                 *cli.Context
 				requirementsFactory *testreq.FakeReqFactory
 			)
 
@@ -66,12 +64,11 @@ var _ = Describe("api command", func() {
 				config.SetSSLDisabled(true)
 
 				ui = new(testterm.FakeUI)
-				ctx = testcmd.NewContext("api", []string{})
 				requirementsFactory = &testreq.FakeReqFactory{}
 			})
 
 			JustBeforeEach(func() {
-				testcmd.RunCommand(NewApi(ui, config, endpointRepo), ctx, requirementsFactory)
+				testcmd.RunCommand2(NewApi(ui, config, endpointRepo), []string{}, requirementsFactory)
 			})
 
 			It("prints out the api endpoint", func() {

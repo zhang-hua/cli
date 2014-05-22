@@ -96,11 +96,10 @@ var _ = Describe("bind-service command", func() {
 
 func callBindService(args []string, requirementsFactory *testreq.FakeReqFactory, serviceBindingRepo api.ServiceBindingRepository) (fakeUI *testterm.FakeUI) {
 	fakeUI = new(testterm.FakeUI)
-	ctxt := testcmd.NewContext("bind-service", args)
 
 	config := testconfig.NewRepositoryWithDefaults()
 
 	cmd := NewBindService(fakeUI, config, serviceBindingRepo)
-	testcmd.RunCommand(cmd, ctxt, requirementsFactory)
+	testcmd.RunCommand2(cmd, args, requirementsFactory)
 	return
 }

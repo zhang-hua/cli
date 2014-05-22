@@ -24,9 +24,9 @@ var _ = Describe("purge-service command", func() {
 			deps.requirementsFactory.LoginSuccess = false
 
 			cmd := NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo)
-			testcmd.RunCommand(
+			testcmd.RunCommand2(
 				cmd,
-				testcmd.NewContext("purge-service-offering", []string{"-f", "whatever"}),
+				[]string{"-f", "whatever"},
 				deps.requirementsFactory,
 			)
 
@@ -37,9 +37,9 @@ var _ = Describe("purge-service command", func() {
 			deps := setupDependencies()
 			deps.requirementsFactory.LoginSuccess = true
 
-			testcmd.RunCommand(
+			testcmd.RunCommand2(
 				NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
-				testcmd.NewContext("purge-service-offering", []string{}),
+				[]string{},
 				deps.requirementsFactory,
 			)
 
@@ -56,9 +56,9 @@ var _ = Describe("purge-service command", func() {
 
 		deps.ui.Inputs = []string{"yes"}
 
-		testcmd.RunCommand(
+		testcmd.RunCommand2(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
-			testcmd.NewContext("purge-service-offering", []string{"-p", "the-provider", "the-service-name"}),
+			[]string{"-p", "the-provider", "the-service-name"},
 			deps.requirementsFactory,
 		)
 
@@ -75,9 +75,9 @@ var _ = Describe("purge-service command", func() {
 
 		deps.ui.Inputs = []string{"yes"}
 
-		testcmd.RunCommand(
+		testcmd.RunCommand2(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
-			testcmd.NewContext("purge-service-offering", []string{"the-service-name"}),
+			[]string{"the-service-name"},
 			deps.requirementsFactory,
 		)
 
@@ -97,9 +97,9 @@ var _ = Describe("purge-service command", func() {
 
 		deps.ui.Inputs = []string{"no"}
 
-		testcmd.RunCommand(
+		testcmd.RunCommand2(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
-			testcmd.NewContext("purge-service-offering", []string{"the-service-name"}),
+			[]string{"the-service-name"},
 			deps.requirementsFactory,
 		)
 
@@ -113,9 +113,9 @@ var _ = Describe("purge-service command", func() {
 		offering := maker.NewServiceOffering("the-service-name")
 		deps.serviceRepo.FindServiceOfferingByLabelAndProviderServiceOffering = offering
 
-		testcmd.RunCommand(
+		testcmd.RunCommand2(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
-			testcmd.NewContext("purge-service-offering", []string{"-f", "the-service-name"}),
+			[]string{"-f", "the-service-name"},
 			deps.requirementsFactory,
 		)
 
@@ -128,9 +128,9 @@ var _ = Describe("purge-service command", func() {
 
 		deps.serviceRepo.FindServiceOfferingByLabelAndProviderApiResponse = cferrors.NewWithError("oh no!", errors.New("!"))
 
-		testcmd.RunCommand(
+		testcmd.RunCommand2(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
-			testcmd.NewContext("purge-service-offering", []string{"-f", "-p", "the-provider", "the-service-name"}),
+			[]string{"-f", "-p", "the-provider", "the-service-name"},
 			deps.requirementsFactory,
 		)
 
@@ -149,9 +149,9 @@ var _ = Describe("purge-service command", func() {
 
 		deps.ui.Inputs = []string{"yes"}
 
-		testcmd.RunCommand(
+		testcmd.RunCommand2(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
-			testcmd.NewContext("purge-service-offering", []string{"-p", "the-provider", "the-service-name"}),
+			[]string{"-p", "the-provider", "the-service-name"},
 			deps.requirementsFactory,
 		)
 

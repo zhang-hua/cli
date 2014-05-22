@@ -31,7 +31,7 @@ var _ = Describe("delete-service-broker command", func() {
 
 	runCommand := func(args ...string) {
 		cmd := NewDeleteServiceBroker(ui, configRepo, brokerRepo)
-		testcmd.RunCommand(cmd, testcmd.NewContext("delete-service-broker", args), requirementsFactory)
+		testcmd.RunCommand2(cmd, args, requirementsFactory)
 	}
 
 	Describe("requirements", func() {
