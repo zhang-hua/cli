@@ -40,7 +40,7 @@ var _ = Describe("app Command", func() {
 
 	runCommand := func(args ...string) {
 		cmd := NewShowApp(ui, configRepo, appSummaryRepo, appInstancesRepo)
-		testcmd.RunCommand2(cmd, args, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
 
 	Describe("requirements", func() {

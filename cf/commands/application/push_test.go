@@ -80,7 +80,7 @@ var _ = Describe("Push Command", func() {
 	})
 
 	callPush := func(args ...string) {
-		testcmd.RunCommand2(cmd, args, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
 
 	Describe("requirements", func() {

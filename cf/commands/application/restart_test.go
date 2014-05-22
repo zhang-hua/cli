@@ -39,7 +39,7 @@ func callRestart(args []string, requirementsFactory *testreq.FakeReqFactory, sta
 	ui = new(testterm.FakeUI)
 
 	cmd := NewRestart(ui, starter, stopper)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

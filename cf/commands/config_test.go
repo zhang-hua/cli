@@ -27,7 +27,7 @@ var _ = Describe("config command", func() {
 
 	runCommand := func(args ...string) {
 		cmd := NewConfig(ui, configRepo)
-		testcmd.RunCommand2(cmd, args, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
 	It("fails requirements when no flags are provided", func() {
 		runCommand()

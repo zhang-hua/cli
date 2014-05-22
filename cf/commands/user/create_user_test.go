@@ -35,7 +35,7 @@ var _ = Describe("Create user command", func() {
 
 	runCommand := func(args ...string) {
 		cmd := NewCreateUser(ui, configRepo, userRepo)
-		testcmd.RunCommand2(cmd, args, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 		return
 	}
 

@@ -108,7 +108,7 @@ func callFiles(args []string, requirementsFactory *testreq.FakeReqFactory, appFi
 
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewFiles(ui, configRepo, appFilesRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 
 	return
 }

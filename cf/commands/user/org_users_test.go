@@ -43,7 +43,7 @@ func callOrgUsers(args []string, requirementsFactory *testreq.FakeReqFactory, us
 	ui = &testterm.FakeUI{}
 	config := testconfig.NewRepositoryWithDefaults()
 	cmd := NewOrgUsers(ui, config, userRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

@@ -45,7 +45,7 @@ func callListServiceAuthTokens(requirementsFactory *testreq.FakeReqFactory, auth
 	config := testconfig.NewRepositoryWithDefaults()
 
 	cmd := NewListServiceAuthTokens(ui, config, authTokenRepo)
-	testcmd.RunCommand2(cmd, []string{}, requirementsFactory)
+	testcmd.RunCommand(cmd, []string{}, requirementsFactory)
 
 	return
 }

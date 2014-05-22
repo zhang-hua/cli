@@ -45,7 +45,7 @@ func callCreateServiceAuthToken(args []string, requirementsFactory *testreq.Fake
 	config := testconfig.NewRepositoryWithDefaults()
 
 	cmd := NewCreateServiceAuthToken(ui, config, authTokenRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

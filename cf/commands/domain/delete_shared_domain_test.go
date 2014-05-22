@@ -163,6 +163,6 @@ func callDeleteSharedDomain(args []string, inputs []string, deps deleteSharedDom
 	configRepo.SetOrganizationFields(orgFields)
 
 	cmd := domain.NewDeleteSharedDomain(ui, configRepo, deps.domainRepo)
-	testcmd.RunCommand2(cmd, args, deps.requirementsFactory)
+	testcmd.RunCommand(cmd, args, deps.requirementsFactory)
 	return
 }

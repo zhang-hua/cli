@@ -107,6 +107,6 @@ func callDeleteOrphanedRoutes(confirmation string, args []string, reqFactory *te
 	ui = &testterm.FakeUI{Inputs: []string{confirmation}}
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewDeleteOrphanedRoutes(ui, configRepo, routeRepo)
-	testcmd.RunCommand2(cmd, args, reqFactory)
+	testcmd.RunCommand(cmd, args, reqFactory)
 	return
 }

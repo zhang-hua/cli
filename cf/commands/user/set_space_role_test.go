@@ -57,7 +57,7 @@ func callSetSpaceRole(args []string, requirementsFactory *testreq.FakeReqFactory
 	configRepo.SetAccessToken(accessToken)
 
 	cmd := NewSetSpaceRole(ui, configRepo, spaceRepo, userRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

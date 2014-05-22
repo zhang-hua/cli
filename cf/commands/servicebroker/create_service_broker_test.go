@@ -94,6 +94,6 @@ func callCreateServiceBroker(args []string, requirementsFactory *testreq.FakeReq
 	ui = &testterm.FakeUI{}
 	config := testconfig.NewRepositoryWithDefaults()
 	cmd := NewCreateServiceBroker(ui, config, serviceBrokerRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

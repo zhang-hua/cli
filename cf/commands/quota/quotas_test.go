@@ -30,7 +30,7 @@ var _ = Describe("quotas command", func() {
 
 	runCommand := func() bool {
 		cmd := NewListQuotas(ui, testconfig.NewRepositoryWithDefaults(), quotaRepo)
-		return testcmd.RunCommand2(cmd, []string{}, requirementsFactory)
+		return testcmd.RunCommand(cmd, []string{}, requirementsFactory)
 	}
 
 	Describe("requirements", func() {

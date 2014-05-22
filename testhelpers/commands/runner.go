@@ -8,7 +8,7 @@ import (
 
 var CommandDidPassRequirements bool
 
-func RunCommand2(cmd command.Command, args []string, requirementsFactory *testreq.FakeReqFactory) (passedRequirements bool) {
+func RunCommand(cmd command.Command, args []string, requirementsFactory *testreq.FakeReqFactory) (passedRequirements bool) {
 	context := NewContext(cmd.Metadata().Name, args)
 
 	defer func() {

@@ -43,7 +43,7 @@ func callSetOrgRole(args []string, requirementsFactory *testreq.FakeReqFactory, 
 	ui = new(testterm.FakeUI)
 	config := testconfig.NewRepositoryWithDefaults()
 	cmd := NewSetOrgRole(ui, config, userRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

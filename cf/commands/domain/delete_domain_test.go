@@ -40,7 +40,7 @@ var _ = Describe("delete-domain command", func() {
 
 	runCommand := func(args ...string) {
 		cmd = NewDeleteDomain(ui, configRepo, domainRepo)
-		testcmd.RunCommand2(cmd, args, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
 
 	Describe("requirements", func() {

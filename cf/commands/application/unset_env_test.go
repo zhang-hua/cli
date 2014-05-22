@@ -149,6 +149,6 @@ func callUnsetEnv(args []string, requirementsFactory *testreq.FakeReqFactory, ap
 	ui = new(testterm.FakeUI)
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewUnsetEnv(ui, configRepo, appRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

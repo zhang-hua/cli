@@ -43,7 +43,7 @@ func callSpaceUsers(args []string, requirementsFactory *testreq.FakeReqFactory, 
 	ui = new(testterm.FakeUI)
 	config := testconfig.NewRepositoryWithDefaults()
 	cmd := NewSpaceUsers(ui, config, spaceRepo, userRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

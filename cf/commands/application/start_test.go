@@ -99,7 +99,7 @@ var _ = Describe("start command", func() {
 	It("fails requirements when not logged in", func() {
 		requirementsFactory.LoginSuccess = false
 		cmd := NewStart(new(testterm.FakeUI), testconfig.NewRepository(), &testcmd.FakeAppDisplayer{}, &testapi.FakeApplicationRepository{}, &testapi.FakeAppInstancesRepo{}, &testapi.FakeLogsRepository{})
-		testcmd.RunCommand2(cmd, []string{"some-app-name"}, requirementsFactory)
+		testcmd.RunCommand(cmd, []string{"some-app-name"}, requirementsFactory)
 		Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 	})
 
@@ -383,7 +383,7 @@ func callStart(args []string, config configuration.Reader, requirementsFactory *
 	cmd.StartupTimeout = 50 * time.Millisecond
 	cmd.PingerThrottle = 50 * time.Millisecond
 
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

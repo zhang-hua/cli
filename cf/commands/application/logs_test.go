@@ -238,6 +238,6 @@ func callLogs(args []string, requirementsFactory *testreq.FakeReqFactory, logsRe
 
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewLogs(ui, configRepo, logsRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

@@ -42,7 +42,7 @@ func callUpdateBuildpack(args []string, requirementsFactory *testreq.FakeReqFact
 	ui = new(testterm.FakeUI)
 
 	cmd := NewUpdateBuildpack(ui, fakeRepo, fakeBitsRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }
 

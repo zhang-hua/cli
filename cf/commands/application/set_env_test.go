@@ -213,6 +213,6 @@ func callSetEnv(args []string, requirementsFactory *testreq.FakeReqFactory, appR
 	ui = new(testterm.FakeUI)
 	configRepo := testconfig.NewRepositoryWithDefaults()
 	cmd := NewSetEnv(ui, configRepo, appRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

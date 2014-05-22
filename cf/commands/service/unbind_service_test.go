@@ -40,7 +40,7 @@ var _ = Describe("unbind-service command", func() {
 	Context("when not logged in", func() {
 		It("fails requirements when not logged in", func() {
 			cmd := NewUnbindService(&testterm.FakeUI{}, testconfig.NewRepository(), serviceBindingRepo)
-			testcmd.RunCommand2(cmd, []string{"my-service", "my-app"}, requirementsFactory)
+			testcmd.RunCommand(cmd, []string{"my-service", "my-app"}, requirementsFactory)
 			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
 		})
 	})
@@ -106,6 +106,6 @@ func callUnbindService(args []string, requirementsFactory *testreq.FakeReqFactor
 	config := testconfig.NewRepositoryWithDefaults()
 
 	cmd := NewUnbindService(fakeUI, config, serviceBindingRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

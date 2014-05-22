@@ -24,7 +24,7 @@ var _ = Describe("purge-service command", func() {
 			deps.requirementsFactory.LoginSuccess = false
 
 			cmd := NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo)
-			testcmd.RunCommand2(
+			testcmd.RunCommand(
 				cmd,
 				[]string{"-f", "whatever"},
 				deps.requirementsFactory,
@@ -37,7 +37,7 @@ var _ = Describe("purge-service command", func() {
 			deps := setupDependencies()
 			deps.requirementsFactory.LoginSuccess = true
 
-			testcmd.RunCommand2(
+			testcmd.RunCommand(
 				NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
 				[]string{},
 				deps.requirementsFactory,
@@ -56,7 +56,7 @@ var _ = Describe("purge-service command", func() {
 
 		deps.ui.Inputs = []string{"yes"}
 
-		testcmd.RunCommand2(
+		testcmd.RunCommand(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
 			[]string{"-p", "the-provider", "the-service-name"},
 			deps.requirementsFactory,
@@ -75,7 +75,7 @@ var _ = Describe("purge-service command", func() {
 
 		deps.ui.Inputs = []string{"yes"}
 
-		testcmd.RunCommand2(
+		testcmd.RunCommand(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
 			[]string{"the-service-name"},
 			deps.requirementsFactory,
@@ -97,7 +97,7 @@ var _ = Describe("purge-service command", func() {
 
 		deps.ui.Inputs = []string{"no"}
 
-		testcmd.RunCommand2(
+		testcmd.RunCommand(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
 			[]string{"the-service-name"},
 			deps.requirementsFactory,
@@ -113,7 +113,7 @@ var _ = Describe("purge-service command", func() {
 		offering := maker.NewServiceOffering("the-service-name")
 		deps.serviceRepo.FindServiceOfferingByLabelAndProviderServiceOffering = offering
 
-		testcmd.RunCommand2(
+		testcmd.RunCommand(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
 			[]string{"-f", "the-service-name"},
 			deps.requirementsFactory,
@@ -128,7 +128,7 @@ var _ = Describe("purge-service command", func() {
 
 		deps.serviceRepo.FindServiceOfferingByLabelAndProviderApiResponse = cferrors.NewWithError("oh no!", errors.New("!"))
 
-		testcmd.RunCommand2(
+		testcmd.RunCommand(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
 			[]string{"-f", "-p", "the-provider", "the-service-name"},
 			deps.requirementsFactory,
@@ -149,7 +149,7 @@ var _ = Describe("purge-service command", func() {
 
 		deps.ui.Inputs = []string{"yes"}
 
-		testcmd.RunCommand2(
+		testcmd.RunCommand(
 			NewPurgeServiceOffering(deps.ui, deps.config, deps.serviceRepo),
 			[]string{"-p", "the-provider", "the-service-name"},
 			deps.requirementsFactory,

@@ -34,7 +34,7 @@ var _ = Describe("delete-service-auth-token command", func() {
 
 	runCommand := func(args ...string) {
 		cmd := NewDeleteServiceAuthToken(ui, configRepo, authTokenRepo)
-		testcmd.RunCommand2(cmd, args, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
 
 	Describe("requirements", func() {

@@ -117,6 +117,6 @@ func callShowOrg(args []string, requirementsFactory *testreq.FakeReqFactory) (ui
 	configRepo.SetOrganizationFields(orgFields)
 
 	cmd := NewShowOrg(ui, configRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

@@ -39,7 +39,7 @@ var _ = Describe("env command", func() {
 
 	runCommand := func(args ...string) {
 		cmd := NewEnv(ui, configRepo, appRepo)
-		testcmd.RunCommand2(cmd, args, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
 
 	Describe("Requirements", func() {

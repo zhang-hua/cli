@@ -42,7 +42,7 @@ var _ = Describe("delete app command", func() {
 	})
 
 	runCommand := func(args ...string) {
-		testcmd.RunCommand2(cmd, args, requirementsFactory)
+		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
 
 	It("fails requirements when not logged in", func() {

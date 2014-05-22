@@ -153,6 +153,6 @@ func callListDomains(args []string, requirementsFactory *testreq.FakeReqFactory,
 	configRepo.SetOrganizationFields(orgFields)
 
 	cmd := domain.NewListDomains(fakeUI, configRepo, domainRepo)
-	testcmd.RunCommand2(cmd, args, requirementsFactory)
+	testcmd.RunCommand(cmd, args, requirementsFactory)
 	return
 }

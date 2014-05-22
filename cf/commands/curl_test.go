@@ -170,5 +170,5 @@ func newCurlDependencies() (deps curlDependencies) {
 
 func runCurlWithInputs(deps curlDependencies, args []string) {
 	cmd := NewCurl(deps.ui, deps.config, deps.curlRepo)
-	testcmd.RunCommand2(cmd, args, deps.requirementsFactory)
+	testcmd.RunCommand(cmd, args, deps.requirementsFactory)
 }
