@@ -31,7 +31,7 @@ func (cmd CreateBuildpack) Metadata() command_metadata.CommandMetadata {
 		Name:        "create-buildpack",
 		Description: T("Create a buildpack"),
 		Usage: T("CF_NAME create-buildpack BUILDPACK PATH POSITION [--enable|--disable]") +
-			"\n\nTIP:\n" + T("   Path should be a zip file, a url to a zip file, or a local directory. Position is an integer, sets priority, and is sorted from lowest to highest."),
+			T("\n\nTIP:\n") + T("   Path should be a zip file, a url to a zip file, or a local directory. Position is an integer, sets priority, and is sorted from lowest to highest."),
 		Flags: []cli.Flag{
 			cli.BoolFlag{Name: "enable", Usage: T("Enable the buildpack")},
 			cli.BoolFlag{Name: "disable", Usage: T("Disable the buildpack")},

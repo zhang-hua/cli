@@ -38,7 +38,7 @@ func (cmd ListBuildpacks) GetRequirements(requirementsFactory requirements.Facto
 }
 
 func (cmd ListBuildpacks) Run(c *cli.Context) {
-	cmd.ui.Say("Getting buildpacks...\n")
+	cmd.ui.Say(T("Getting buildpacks...\n"))
 
 	table := cmd.ui.Table([]string{"buildpack", T("position"), T("enabled"), T("locked"), T("filename")})
 	noBuildpacks := true

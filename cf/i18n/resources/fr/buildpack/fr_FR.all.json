@@ -113,7 +113,7 @@
    },
    {
       "id": "Force deletion without confirmation",
-      "translation": "Force deletion without confirmation"
+      "translation": "Force de supprimer sans confirmation"
    },
    {
       "id": "Error uploading buildpack {{.Name}}\n{{.Error}}",
