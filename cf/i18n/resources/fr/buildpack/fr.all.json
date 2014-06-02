@@ -8,10 +8,6 @@
       "translation": "   Path should be a zip file, a url to a zip file, or a local directory. Position is an integer, sets priority, and is sorted from lowest to highest."
    },
    {
-      "id": " update-buildpack",
-      "translation": " update-buildpack"
-   },
-   {
       "id": "Buildpack %s already exists",
       "translation": "Buildpack %s already exists"
    },
