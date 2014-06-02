@@ -40,12 +40,8 @@
       "translation": "CF_NAME update-buildpack BUILDPACK [-p PATH] [-i POSITION] [--enable|--disable] [--lock|--unlock]"
    },
    {
-      "id": "Cannot specify both enabled and disabled options.",
-      "translation": "Cannot specify both enabled and disabled options."
-   },
-   {
-      "id": "Cannot specify both enabled and disabled.",
-      "translation": "Cannot specify both enabled and disabled."
+      "id": "Cannot specify both {{.Enabled}} and {{.Disabled}}.",
+      "translation": "Cannot specify both {{.Enabled}} and {{.Disabled}}."
    },
    {
       "id": "Cannot specify both lock and unlock options.",
@@ -80,20 +76,20 @@
       "translation": "Enable the buildpack"
    },
    {
-      "id": "Error deleting buildpack %s\n%s",
-      "translation": "Error deleting buildpack %s\n%s"
+      "id": "Error deleting buildpack {{.Name}}\n{{.Error}}",
+      "translation": "Error deleting buildpack {{.Name}}\n{{.Error}}"
    },
    {
-      "id": "Error renaming buildpack %s\n%s",
-      "translation": "Error renaming buildpack %s\n%s"
+      "id": "Error renaming buildpack {{.Name}}\n{{.Error}}",
+      "translation": "Error renaming buildpack {{.Name}}\n{{.Error}}"
    },
    {
-      "id": "Error updating buildpack %s\n%s",
-      "translation": "Error updating buildpack %s\n%s"
+      "id": "Error updating buildpack {{.Name}}\n{{.Error}}",
+      "translation": "Error updating buildpack {{.Name}}\n{{.Error}}"
    },
    {
-      "id": "Error uploading buildpack %s\n%s",
-      "translation": "Error uploading buildpack %s\n%s"
+      "id": "Error uploading buildpack {{.Name}}\n{{.Error}}",
+      "translation": "Error uploading buildpack {{.Name}}\n{{.Error}}"
    },
    {
       "id": "Failed fetching buildpacks.\n%s",
