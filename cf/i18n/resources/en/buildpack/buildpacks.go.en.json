@@ -1,0 +1,38 @@
+[
+   {
+      "id": "Getting buildpacks...\n",
+      "translation": "Getting buildpacks...\n"
+   },
+   {
+      "id": "position",
+      "translation": "position"
+   },
+   {
+      "id": "locked",
+      "translation": "locked"
+   },
+   {
+      "id": "filename",
+      "translation": "filename"
+   },
+   {
+      "id": "No buildpacks found",
+      "translation": "No buildpacks found"
+   },
+   {
+      "id": "List all buildpacks",
+      "translation": "List all buildpacks"
+   },
+   {
+      "id": "CF_NAME buildpacks",
+      "translation": "CF_NAME buildpacks"
+   },
+   {
+      "id": "enabled",
+      "translation": "enabled"
+   },
+   {
+      "id": "Failed fetching buildpacks.\n%s",
+      "translation": "Failed fetching buildpacks.\n%s"
+   }
+]

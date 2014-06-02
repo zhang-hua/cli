@@ -1,0 +1,26 @@
+[
+   {
+      "id": "Delete a buildpack",
+      "translation": "Delete a buildpack"
+   },
+   {
+      "id": "CF_NAME delete-buildpack BUILDPACK [-f]",
+      "translation": "CF_NAME delete-buildpack BUILDPACK [-f]"
+   },
+   {
+      "id": "Force deletion without confirmation",
+      "translation": "Force deletion without confirmation"
+   },
+   {
+      "id": "Deleting buildpack %s...",
+      "translation": "Deleting buildpack %s..."
+   },
+   {
+      "id": "Buildpack %s does not exist.",
+      "translation": "Buildpack %s does not exist."
+   },
+   {
+      "id": "Error deleting buildpack %s\n%s",
+      "translation": "Error deleting buildpack %s\n%s"
+   }
+]
