@@ -1,0 +1,178 @@
+[
+   {
+      "id": "\n\nTIP:\n",
+      "translation": "\n\nTIP:\n"
+   },
+   {
+      "id": "   Path should be a zip file, a url to a zip file, or a local directory. Position is an integer, sets priority, and is sorted from lowest to highest.",
+      "translation": "   Path should be a zip file, a url to a zip file, or a local directory. Position is an integer, sets priority, and is sorted from lowest to highest."
+   },
+   {
+      "id": " update-buildpack",
+      "translation": " update-buildpack"
+   },
+   {
+      "id": "Buildpack %s already exists",
+      "translation": "Buildpack %s already exists"
+   },
+   {
+      "id": "Buildpack %s does not exist.",
+      "translation": "Buildpack %s does not exist."
+   },
+   {
+      "id": "Buildpack position among other buildpacks",
+      "translation": "Buildpack position among other buildpacks"
+   },
+   {
+      "id": "CF_NAME buildpacks",
+      "translation": "CF_NAME buildpacks"
+   },
+   {
+      "id": "CF_NAME create-buildpack BUILDPACK PATH POSITION [--enable|--disable]",
+      "translation": "CF_NAME create-buildpack BUILDPACK PATH POSITION [--enable|--disable]"
+   },
+   {
+      "id": "CF_NAME delete-buildpack BUILDPACK [-f]",
+      "translation": "CF_NAME delete-buildpack BUILDPACK [-f]"
+   },
+   {
+      "id": "CF_NAME rename-buildpack BUILDPACK_NAME NEW_BUILDPACK_NAME",
+      "translation": "CF_NAME rename-buildpack BUILDPACK_NAME NEW_BUILDPACK_NAME"
+   },
+   {
+      "id": "CF_NAME update-buildpack BUILDPACK [-p PATH] [-i POSITION] [--enable|--disable] [--lock|--unlock]",
+      "translation": "CF_NAME update-buildpack BUILDPACK [-p PATH] [-i POSITION] [--enable|--disable] [--lock|--unlock]"
+   },
+   {
+      "id": "Cannot specify both enabled and disabled options.",
+      "translation": "Cannot specify both enabled and disabled options."
+   },
+   {
+      "id": "Cannot specify both enabled and disabled.",
+      "translation": "Cannot specify both enabled and disabled."
+   },
+   {
+      "id": "Cannot specify both lock and unlock options.",
+      "translation": "Cannot specify both lock and unlock options."
+   },
+   {
+      "id": "Cannot specify buildpack bits and lock/unlock.",
+      "translation": "Cannot specify buildpack bits and lock/unlock."
+   },
+   {
+      "id": "Create a buildpack",
+      "translation": "Create a buildpack"
+   },
+   {
+      "id": "Creating buildpack %s...",
+      "translation": "Creating buildpack %s..."
+   },
+   {
+      "id": "Delete a buildpack",
+      "translation": "Delete a buildpack"
+   },
+   {
+      "id": "Deleting buildpack %s...",
+      "translation": "Deleting buildpack %s..."
+   },
+   {
+      "id": "Disable the buildpack",
+      "translation": "Disable the buildpack"
+   },
+   {
+      "id": "Enable the buildpack",
+      "translation": "Enable the buildpack"
+   },
+   {
+      "id": "Error deleting buildpack %s\n%s",
+      "translation": "Error deleting buildpack %s\n%s"
+   },
+   {
+      "id": "Error renaming buildpack %s\n%s",
+      "translation": "Error renaming buildpack %s\n%s"
+   },
+   {
+      "id": "Error updating buildpack %s\n%s",
+      "translation": "Error updating buildpack %s\n%s"
+   },
+   {
+      "id": "Error uploading buildpack %s\n%s",
+      "translation": "Error uploading buildpack %s\n%s"
+   },
+   {
+      "id": "Failed fetching buildpacks.\n%s",
+      "translation": "Failed fetching buildpacks.\n%s"
+   },
+   {
+      "id": "Force deletion without confirmation",
+      "translation": "Force deletion without confirmation"
+   },
+   {
+      "id": "Getting buildpacks...\n",
+      "translation": "Getting buildpacks...\n"
+   },
+   {
+      "id": "Invalid position. %s",
+      "translation": "Invalid position. %s"
+   },
+   {
+      "id": "List all buildpacks",
+      "translation": "List all buildpacks"
+   },
+   {
+      "id": "Lock the buildpack",
+      "translation": "Lock the buildpack"
+   },
+   {
+      "id": "No buildpacks found",
+      "translation": "No buildpacks found"
+   },
+   {
+      "id": "Path to directory or zip file",
+      "translation": "Path to directory or zip file"
+   },
+   {
+      "id": "Rename a buildpack",
+      "translation": "Rename a buildpack"
+   },
+   {
+      "id": "Renaming buildpack %s to %s...",
+      "translation": "Renaming buildpack %s to %s..."
+   },
+   {
+      "id": "TIP: use '%s' to update this buildpack",
+      "translation": "TIP: use '%s' to update this buildpack"
+   },
+   {
+      "id": "Unlock the buildpack",
+      "translation": "Unlock the buildpack"
+   },
+   {
+      "id": "Update a buildpack",
+      "translation": "Update a buildpack"
+   },
+   {
+      "id": "Updating buildpack %s...",
+      "translation": "Updating buildpack %s..."
+   },
+   {
+      "id": "Uploading buildpack %s...",
+      "translation": "Uploading buildpack %s..."
+   },
+   {
+      "id": "enabled",
+      "translation": "enabled"
+   },
+   {
+      "id": "filename",
+      "translation": "filename"
+   },
+   {
+      "id": "locked",
+      "translation": "locked"
+   },
+   {
+      "id": "position",
+      "translation": "position"
+   }
+]
