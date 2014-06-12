@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/cli/cf/api"
-	. "github.com/cloudfoundry/cli/cf/commands/application"
 	"github.com/cloudfoundry/cli/cf/configuration"
 	"github.com/cloudfoundry/cli/cf/errors"
 	"github.com/cloudfoundry/cli/cf/models"
@@ -16,10 +15,11 @@ import (
 	testreq "github.com/cloudfoundry/cli/testhelpers/requirements"
 	testterm "github.com/cloudfoundry/cli/testhelpers/terminal"
 	"github.com/cloudfoundry/loggregatorlib/logmessage"
+
+	. "github.com/cloudfoundry/cli/cf/commands/application"
+	. "github.com/cloudfoundry/cli/testhelpers/matchers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	. "github.com/cloudfoundry/cli/testhelpers/matchers"
 )
 
 var _ = Describe("start command", func() {
@@ -401,6 +401,47 @@ var _ = Describe("start command", func() {
 				[]string{"error tailing logs"},
 				[]string{"Ooops"},
 			))
+		})
+	})
+
+	Describe("pinger throttle", func() {
+		var (
+			ui  *testterm.FakeUI
+			cmd Start
+		)
+		BeforeEach(func() {
+			configRepo := testconfig.NewRepositoryWithDefaults()
+			appRepo := &testapi.FakeApplicationRepository{
+				UpdateAppResult: app,
+			}
+			appRepo.ReadReturns.App = app
+			appInstancesRepo := &testapi.FakeAppInstancesRepo{
+				GetInstancesResponses:  instances,
+				GetInstancesErrorCodes: errorCodes,
+			}
+
+			logRepo := &testapi.FakeLogsRepository{
+				TailLogMessages: []*logmessage.LogMessage{
+					testlogs.NewLogMessage("Log Line 1", app.Guid, LogMessageTypeStaging, time.Now()),
+					testlogs.NewLogMessage("Log Line 2", app.Guid, LogMessageTypeStaging, time.Now()),
+				},
+			}
+
+			stillStarting := models.AppInstanceFields{State: models.InstanceStarting}
+			running := models.AppInstanceFields{State: models.InstanceStarting}
+			appInstancesRepo := &testapi.FakeAppInstancesRepo{
+				GetInstancesResponses: [][]models.AppInstanceFields{
+					[]models.AppInstanceFields{stillStarting},
+					[]models.AppInstanceFields{running},
+				},
+			}
+
+			ui = &testterm.FakeUI{}
+			cmd = NewStart(ui, configRepo, displayApp, appRepo, appInstancesRepo, logRepo)
+		})
+
+		It("waits for that period between each request", func() {
+			testcmd.RunCommand(cmd, []string{"my-app"}, requirementsFactory)
 		})
 	})
 })

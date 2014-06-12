@@ -2,11 +2,12 @@ package terminal
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/cloudfoundry/cli/cf/configuration"
 	term "github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/codegangsta/cli"
-	"strings"
-	"time"
 )
 
 const FailedWasCalled = "FailedWasCalled"
@@ -20,6 +21,7 @@ type FakeUI struct {
 	FailedWithUsage            bool
 	FailedWithUsageCommandName string
 	ShowConfigurationCalled    bool
+	WaitForDuration            time.Duration
 }
 
 func (ui *FakeUI) PrintPaginator(rows []string, err error) {
@@ -133,8 +135,9 @@ func (ui *FakeUI) ShowConfiguration(config configuration.Reader) {
 func (ui FakeUI) LoadingIndication() {
 }
 
-func (c FakeUI) Wait(duration time.Duration) {
+func (c *FakeUI) Wait(duration time.Duration) {
 	time.Sleep(duration)
+	c.WaitForDuration += duration
 }
 
 func (ui *FakeUI) Table(headers []string) term.Table {
