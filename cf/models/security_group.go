@@ -4,7 +4,7 @@ package models
 type SecurityGroupFields struct {
 	Name  string
 	Guid  string
-	Rules []map[string]string
+	Rules []map[string]interface{}
 }
 
 // represents the JSON that we send up to CC when the user creates / updates a record
