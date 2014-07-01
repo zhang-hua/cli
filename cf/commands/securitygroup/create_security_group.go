@@ -1,6 +1,7 @@
 package securitygroup
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -32,10 +33,11 @@ func NewCreateSecurityGroup(ui terminal.UI, configRepo configuration.Reader, sec
 func (cmd CreateSecurityGroup) Metadata() command_metadata.CommandMetadata {
 	return command_metadata.CommandMetadata{
 		Name:        "create-security-group",
-		Description: "create a security group",
+		Description: "Create a security group",
 		Usage:       "CF_NAME create-security-group NAME [--json PATH_TO_JSON_FILE]",
 		Flags: []cli.Flag{
 			flag_helpers.NewStringFlag("json", "Path to a file containing rules in JSON format"),
+			flag_helpers.NewStringFlag("csv", "Path to a file containing rules in CSV format"),
 		},
 	}
 }
@@ -56,6 +58,14 @@ func (cmd CreateSecurityGroup) Run(context *cli.Context) {
 	if err != nil {
 		cmd.ui.Failed(err.Error())
 	}
+
+	pathToCSVFile := context.String("csv")
+	csvRules, err := cmd.parseCSV(pathToCSVFile)
+	if err != nil {
+		cmd.ui.Failed(err.Error())
+	}
+
+	rules = append(rules, csvRules...)
 
 	cmd.ui.Say("Creating security group %s as %s",
 		terminal.EntityNameColor(name),
@@ -101,4 +111,50 @@ func (cmd CreateSecurityGroup) parseJSON(path string) ([]map[string]string, erro
 	}
 
 	return ruleMaps, nil
+}
+
+func (cmd CreateSecurityGroup) parseCSV(path string) ([]map[string]string, error) {
+	if path == "" {
+		return []map[string]string{}, nil
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	records, err := csv.NewReader(file).ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	rules := []map[string]string{}
+	for _, record := range records {
+		protocol := record[0]
+
+		switch protocol {
+		case "tcp", "udp":
+			rules = append(rules, map[string]string{
+				"protocol":    protocol,
+				"destination": record[1],
+				"ports":       record[2],
+			})
+		case "icmp":
+			rules = append(rules, map[string]string{
+				"protocol":    protocol,
+				"destination": record[1],
+				"type":        record[2],
+				"code":        record[3],
+			})
+		case "all":
+			rules = append(rules, map[string]string{
+				"protocol":    protocol,
+				"destination": record[1],
+			})
+		default:
+			return nil, errors.New("Unknown protocol: " + protocol)
+		}
+	}
+
+	return rules, nil
 }

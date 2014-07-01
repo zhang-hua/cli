@@ -81,31 +81,72 @@ var _ = Describe("create-security-group command", func() {
 				os.Remove(tempFile.Name())
 			})
 
-			JustBeforeEach(func() {
-				runCommand("--json", tempFile.Name(), "security-groups-rule-everything-around-me")
+			Context("when the rules are JSON", func() {
+				JustBeforeEach(func() {
+					runCommand("--json", tempFile.Name(), "security-groups-rule-everything-around-me")
+				})
+
+				Context("when the file specified has valid json", func() {
+					BeforeEach(func() {
+						tempFile.Write([]byte(`[{"protocol":"udp","port":"8080-9090","destination":"198.41.191.47/1"}]`))
+					})
+
+					It("creates the security group with those rules, obviously", func() {
+						Expect(securityGroupRepo.CreateArgsForCall(0).Rules).To(Equal([]map[string]string{
+							{"protocol": "udp", "port": "8080-9090", "destination": "198.41.191.47/1"},
+						}))
+					})
+				})
+
+				Context("when the file specified has invalid json", func() {
+					BeforeEach(func() {
+						tempFile.Write([]byte(`[{noquote: thiswontwork}]`))
+					})
+
+					It("freaks out", func() {
+						Expect(ui.Outputs).To(ContainSubstrings(
+							[]string{"FAILED"},
+						))
+					})
+				})
 			})
 
-			Context("when the file specified has valid json", func() {
-				BeforeEach(func() {
-					tempFile.Write([]byte(`[{"protocol":"udp","port":"8080-9090","destination":"198.41.191.47/1"}]`))
+			Context("when the rules are CSV", func() {
+				JustBeforeEach(func() {
+					runCommand("--csv", tempFile.Name(), "csv-security-group-rules")
 				})
 
-				It("creates the security group with those rules, obviously", func() {
-					Expect(securityGroupRepo.CreateArgsForCall(0).Rules).To(Equal([]map[string]string{
-						{"protocol": "udp", "port": "8080-9090", "destination": "198.41.191.47/1"},
-					}))
-				})
-			})
+				Context("when the rules are valid", func() {
+					BeforeEach(func() {
+						tempFile.Write([]byte(`
+tcp,192.168.1.1/1,8080-8081,
+udp,8.8.8.8/4,1-100,
+icmp,8.8.4.4/16,0,1
+all,192.168.0.0/8,,
+`))
+					})
 
-			Context("when the file specified has invalid json", func() {
-				BeforeEach(func() {
-					tempFile.Write([]byte(`[{noquote: thiswontwork}]`))
+					It("parses the rules", func() {
+						Expect(securityGroupRepo.CreateArgsForCall(0).Rules).To(Equal([]map[string]string{
+							{"protocol": "tcp", "destination": "192.168.1.1/1", "ports": "8080-8081"},
+							{"protocol": "udp", "destination": "8.8.8.8/4", "ports": "1-100"},
+							{"protocol": "icmp", "destination": "8.8.4.4/16", "type": "0", "code": "1"},
+							{"protocol": "all", "destination": "192.168.0.0/8"},
+						}))
+					})
 				})
 
-				It("freaks out", func() {
-					Expect(ui.Outputs).To(ContainSubstrings(
-						[]string{"FAILED"},
-					))
+				Context("when the user misunderstands this feature and provides some rules that are not ... quite perfect", func() {
+					BeforeEach(func() {
+						tempFile.Write([]byte(`
+tcp,192.168.1.1/1,8080
+icmp,8.8.4.4/16,0,1
+`))
+					})
+
+					It("crashes and burns and fails and oh the screaming the screaming it won't stop", func() {
+						Expect(ui.Outputs).To(ContainSubstrings([]string{"FAILED"}))
+					})
 				})
 			})
 		})
