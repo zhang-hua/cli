@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strconv"
 
 	"github.com/cloudfoundry/cli/cf/api/security_groups"
 	"github.com/cloudfoundry/cli/cf/command_metadata"
@@ -89,9 +90,9 @@ func (cmd CreateSecurityGroup) Run(context *cli.Context) {
 	cmd.ui.Ok()
 }
 
-func (cmd CreateSecurityGroup) parseJSON(path string) ([]map[string]string, error) {
+func (cmd CreateSecurityGroup) parseJSON(path string) ([]map[string]interface{}, error) {
 	if path == "" {
-		return []map[string]string{}, nil
+		return []map[string]interface{}{}, nil
 	}
 
 	file, err := os.Open(path)
@@ -104,7 +105,7 @@ func (cmd CreateSecurityGroup) parseJSON(path string) ([]map[string]string, erro
 		return nil, err
 	}
 
-	ruleMaps := []map[string]string{}
+	ruleMaps := []map[string]interface{}{}
 	err = json.Unmarshal(bytes, &ruleMaps)
 	if err != nil {
 		cmd.ui.Failed("Incorrect json format: %s", err.Error())
@@ -113,9 +114,9 @@ func (cmd CreateSecurityGroup) parseJSON(path string) ([]map[string]string, erro
 	return ruleMaps, nil
 }
 
-func (cmd CreateSecurityGroup) parseCSV(path string) ([]map[string]string, error) {
+func (cmd CreateSecurityGroup) parseCSV(path string) ([]map[string]interface{}, error) {
 	if path == "" {
-		return []map[string]string{}, nil
+		return []map[string]interface{}{}, nil
 	}
 
 	file, err := os.Open(path)
@@ -128,26 +129,36 @@ func (cmd CreateSecurityGroup) parseCSV(path string) ([]map[string]string, error
 		return nil, err
 	}
 
-	rules := []map[string]string{}
+	rules := []map[string]interface{}{}
 	for _, record := range records {
 		protocol := record[0]
 
 		switch protocol {
 		case "tcp", "udp":
-			rules = append(rules, map[string]string{
+			rules = append(rules, map[string]interface{}{
 				"protocol":    protocol,
 				"destination": record[1],
 				"ports":       record[2],
 			})
 		case "icmp":
-			rules = append(rules, map[string]string{
+			typeAsInt, err := strconv.Atoi(record[2])
+			if err != nil {
+				return nil, err
+			}
+
+			codeAsInt, err := strconv.Atoi(record[3])
+			if err != nil {
+				return nil, err
+			}
+
+			rules = append(rules, map[string]interface{}{
 				"protocol":    protocol,
 				"destination": record[1],
-				"type":        record[2],
-				"code":        record[3],
+				"type":        typeAsInt,
+				"code":        codeAsInt,
 			})
 		case "all":
-			rules = append(rules, map[string]string{
+			rules = append(rules, map[string]interface{}{
 				"protocol":    protocol,
 				"destination": record[1],
 			})

@@ -92,7 +92,7 @@ var _ = Describe("create-security-group command", func() {
 					})
 
 					It("creates the security group with those rules, obviously", func() {
-						Expect(securityGroupRepo.CreateArgsForCall(0).Rules).To(Equal([]map[string]string{
+						Expect(securityGroupRepo.CreateArgsForCall(0).Rules).To(Equal([]map[string]interface{}{
 							{"protocol": "udp", "port": "8080-9090", "destination": "198.41.191.47/1"},
 						}))
 					})
@@ -127,10 +127,10 @@ all,192.168.0.0/8,,
 					})
 
 					It("parses the rules", func() {
-						Expect(securityGroupRepo.CreateArgsForCall(0).Rules).To(Equal([]map[string]string{
+						Expect(securityGroupRepo.CreateArgsForCall(0).Rules).To(Equal([]map[string]interface{}{
 							{"protocol": "tcp", "destination": "192.168.1.1/1", "ports": "8080-8081"},
 							{"protocol": "udp", "destination": "8.8.8.8/4", "ports": "1-100"},
-							{"protocol": "icmp", "destination": "8.8.4.4/16", "type": "0", "code": "1"},
+							{"protocol": "icmp", "destination": "8.8.4.4/16", "type": 0, "code": 1},
 							{"protocol": "all", "destination": "192.168.0.0/8"},
 						}))
 					})
