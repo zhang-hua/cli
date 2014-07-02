@@ -34,7 +34,7 @@ var _ = FDescribe("start command", func() {
 	)
 
 	BeforeEach(func() {
-		ui = new(testterm.FakeUI)
+		ui = &testterm.FakeUI{}
 		mockClock = &clock.FakeClock{}
 		requirementsFactory = &testreq.FakeReqFactory{}
 
@@ -68,19 +68,29 @@ var _ = FDescribe("start command", func() {
 			[]models.AppInstanceFields{instance1, instance2},
 			[]models.AppInstanceFields{instance3, instance4},
 		}
-	})
-
-	// FIXME: rename this "run command"
-	callStart := func(args []string, config configuration.Reader, requirementsFactory *testreq.FakeReqFactory, displayApp ApplicationDisplayer, appRepo api.ApplicationRepository, appInstancesRepo api.AppInstancesRepository, logRepo api.LogsRepository) (ui *testterm.FakeUI) {
-		ui = new(testterm.FakeUI)
 
 		cmd := NewStart(ui, config, mockClock, displayApp, appRepo, appInstancesRepo, logRepo)
 		cmd.StagingTimeout = 50 * time.Millisecond
 		cmd.StartupTimeout = 100 * time.Millisecond
 		cmd.PingerThrottle = 50 * time.Millisecond
+	})
 
+	runCommand := func(args ...string) {
 		testcmd.RunCommand(cmd, args, requirementsFactory)
-		return
+	}
+
+	runTheClock := func() {
+		for {
+			select {
+			case <-time.After(time.Millisecond * 10):
+				mockClock.Tick()
+			}
+		}
+	}
+
+	// FIXME: rename this "run command"
+	callStart := func(args []string, config configuration.Reader, requirementsFactory *testreq.FakeReqFactory, displayApp ApplicationDisplayer, appRepo api.ApplicationRepository, appInstancesRepo api.AppInstancesRepository, logRepo api.LogsRepository) (ui *testterm.FakeUI) {
+		runCommand()
 	}
 
 	// FIXME: KILL THIS FUNCTION
@@ -109,11 +119,29 @@ var _ = FDescribe("start command", func() {
 		return
 	}
 
-	It("fails requirements when not logged in", func() {
-		requirementsFactory.LoginSuccess = false
-		cmd := NewStart(new(testterm.FakeUI), testconfig.NewRepository(), mockClock, &testcmd.FakeAppDisplayer{}, &testapi.FakeApplicationRepository{}, &testapi.FakeAppInstancesRepo{}, &testapi.FakeLogsRepository{})
-		testcmd.RunCommand(cmd, []string{"some-app-name"}, requirementsFactory)
-		Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
+	Describe("requirements", func() {
+		It("fails requirements when not logged in", func() {
+			requirementsFactory.LoginSuccess = false
+			cmd := NewStart(new(testterm.FakeUI), testconfig.NewRepository(), mockClock, &testcmd.FakeAppDisplayer{}, &testapi.FakeApplicationRepository{}, &testapi.FakeAppInstancesRepo{}, &testapi.FakeLogsRepository{})
+			testcmd.RunCommand(cmd, []string{"some-app-name"}, requirementsFactory)
+			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
+		})
+
+		It("fails with usage when provided with no args", func() {
+			config := testconfig.NewRepository()
+			displayApp := &testcmd.FakeAppDisplayer{}
+			appRepo := &testapi.FakeApplicationRepository{}
+			appInstancesRepo := &testapi.FakeAppInstancesRepo{
+				GetInstancesResponses: [][]models.AppInstanceFields{
+					[]models.AppInstanceFields{},
+				},
+				GetInstancesErrorCodes: []string{""},
+			}
+			logRepo := &testapi.FakeLogsRepository{}
+
+			ui := callStart([]string{}, config, requirementsFactory, displayApp, appRepo, appInstancesRepo, logRepo)
+			Expect(ui.FailedWithUsage).To(BeTrue())
+		})
 	})
 
 	Describe("timeouts", func() {
@@ -191,22 +219,6 @@ var _ = FDescribe("start command", func() {
 	Context("when logged in", func() {
 		BeforeEach(func() {
 			requirementsFactory.LoginSuccess = true
-		})
-
-		It("fails with usage when provided with no args", func() {
-			config := testconfig.NewRepository()
-			displayApp := &testcmd.FakeAppDisplayer{}
-			appRepo := &testapi.FakeApplicationRepository{}
-			appInstancesRepo := &testapi.FakeAppInstancesRepo{
-				GetInstancesResponses: [][]models.AppInstanceFields{
-					[]models.AppInstanceFields{},
-				},
-				GetInstancesErrorCodes: []string{""},
-			}
-			logRepo := &testapi.FakeLogsRepository{}
-
-			ui := callStart([]string{}, config, requirementsFactory, displayApp, appRepo, appInstancesRepo, logRepo)
-			Expect(ui.FailedWithUsage).To(BeTrue())
 		})
 
 		It("starts an app, when given the app's name", func() {
@@ -344,6 +356,8 @@ var _ = FDescribe("start command", func() {
 		})
 
 		It("tells the user about the failure when waiting for the app to start times out", func() {
+			go runTheClock()
+
 			displayApp := &testcmd.FakeAppDisplayer{}
 			appInstance := models.AppInstanceFields{}
 			appInstance.State = models.InstanceStarting

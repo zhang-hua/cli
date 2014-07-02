@@ -204,10 +204,10 @@ func isStagingError(err error) bool {
 }
 
 func (cmd Start) waitForInstancesToStage(app models.Application) {
-	stagingStartTime := time.Now()
+	stagingStartTime := cmd.clock.Now()
 	_, err := cmd.appInstancesRepo.GetInstances(app.Guid)
 
-	for isStagingError(err) && time.Since(stagingStartTime) < cmd.StagingTimeout {
+	for isStagingError(err) && cmd.clock.Since(stagingStartTime) < cmd.StagingTimeout {
 		cmd.ui.Wait(cmd.PingerThrottle)
 		_, err = cmd.appInstancesRepo.GetInstances(app.Guid)
 	}
@@ -224,10 +224,10 @@ func (cmd Start) waitForInstancesToStage(app models.Application) {
 }
 
 func (cmd Start) waitForOneRunningInstance(app models.Application) {
-	startupStartTime := time.Now()
+	startupStartTime := cmd.clock.Now()
 
 	for {
-		if time.Since(startupStartTime) > cmd.StartupTimeout {
+		if cmd.clock.Since(startupStartTime) > cmd.StartupTimeout {
 			cmd.ui.Failed(fmt.Sprintf(T("Start app timeout\n\nTIP: use '{{.Command}}' for more information",
 				map[string]interface{}{
 					"Command": terminal.CommandColor(fmt.Sprintf("%s logs %s --recent", cf.Name(), app.Name))})))
