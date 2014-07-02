@@ -16,6 +16,7 @@ import (
 	"github.com/cloudfoundry/cli/cf/models"
 	"github.com/cloudfoundry/cli/cf/requirements"
 	"github.com/cloudfoundry/cli/cf/terminal"
+	"github.com/cloudfoundry/cli/clock"
 	"github.com/cloudfoundry/loggregatorlib/logmessage"
 	"github.com/codegangsta/cli"
 )
@@ -31,6 +32,7 @@ const LogMessageTypeStaging = "STG"
 type Start struct {
 	ui               terminal.UI
 	config           configuration.Reader
+	clock            clock.Clock
 	appDisplayer     ApplicationDisplayer
 	appReq           requirements.ApplicationRequirement
 	appRepo          api.ApplicationRepository
@@ -51,7 +53,7 @@ type ApplicationStagingWatcher interface {
 	ApplicationWatchStaging(app models.Application, startCommand func(app models.Application) (models.Application, error)) (updatedApp models.Application, err error)
 }
 
-func NewStart(ui terminal.UI, config configuration.Reader, appDisplayer ApplicationDisplayer, appRepo api.ApplicationRepository, appInstancesRepo api.AppInstancesRepository, logRepo api.LogsRepository) (cmd *Start) {
+func NewStart(ui terminal.UI, config configuration.Reader, clock clock.Clock, appDisplayer ApplicationDisplayer, appRepo api.ApplicationRepository, appInstancesRepo api.AppInstancesRepository, logRepo api.LogsRepository) (cmd *Start) {
 	cmd = new(Start)
 	cmd.ui = ui
 	cmd.config = config
@@ -59,6 +61,7 @@ func NewStart(ui terminal.UI, config configuration.Reader, appDisplayer Applicat
 	cmd.appRepo = appRepo
 	cmd.appInstancesRepo = appInstancesRepo
 	cmd.logRepo = logRepo
+	cmd.clock = clock
 
 	cmd.PingerThrottle = DefaultPingerThrottle
 
