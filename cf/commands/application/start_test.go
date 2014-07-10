@@ -31,12 +31,17 @@ var _ = FDescribe("start command", func() {
 		defaultInstanceErrorCodes = []string{"", ""}
 		requirementsFactory       *testreq.FakeReqFactory
 		mockClock                 *clock.FakeClock
+		config                    configuration.ReadWriter
+
+		appDisplayer ApplicationDisplayer
 	)
 
 	BeforeEach(func() {
 		ui = &testterm.FakeUI{}
 		mockClock = &clock.FakeClock{}
 		requirementsFactory = &testreq.FakeReqFactory{}
+		config = testconfig.NewRepositoryWithDefaults()
+		displayApp = &testcmd.FakeAppDisplayer{}
 
 		defaultAppForStart.Name = "my-app"
 		defaultAppForStart.Guid = "my-app-guid"
