@@ -22,7 +22,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("start command", func() {
+var _ = FDescribe("start command", func() {
 	var (
 		ui                        *testterm.FakeUI
 		cmd                       *Start
@@ -64,22 +64,13 @@ var _ = Describe("start command", func() {
 
 		defaultAppForStart.Routes = []models.RouteSummary{route}
 
-		instance1 := models.AppInstanceFields{}
-		instance1.State = models.InstanceStarting
-
-		instance2 := models.AppInstanceFields{}
-		instance2.State = models.InstanceStarting
-
-		instance3 := models.AppInstanceFields{}
-		instance3.State = models.InstanceRunning
-
-		instance4 := models.AppInstanceFields{}
-		instance4.State = models.InstanceStarting
+		starting := models.AppInstanceFields{State: models.InstanceStarting}
+		running := models.AppInstanceFields{State: models.InstanceRunning}
 
 		defaultInstanceReponses = [][]models.AppInstanceFields{
-			[]models.AppInstanceFields{instance1, instance2},
-			[]models.AppInstanceFields{instance1, instance2},
-			[]models.AppInstanceFields{instance3, instance4},
+			[]models.AppInstanceFields{starting, starting},
+			[]models.AppInstanceFields{starting, starting},
+			[]models.AppInstanceFields{starting, running},
 		}
 
 		cmd = NewStart(ui, configRepo, mockClock, appDisplayer, appRepo, appInstancesRepo, logRepo)
@@ -92,7 +83,7 @@ var _ = Describe("start command", func() {
 	runTheClock := func(stopChannel chan bool) {
 		for {
 			select {
-			case <-time.After(time.Millisecond * 10):
+			case <-time.After(time.Millisecond * 100):
 				mockClock.Tick()
 			case <-stopChannel:
 				return
@@ -109,7 +100,7 @@ var _ = Describe("start command", func() {
 	})
 
 	// FIXME: KILL THIS FUNCTION
-	startAppWithInstancesAndErrors := func(appDisplayer ApplicationDisplayer, app models.Application, instances [][]models.AppInstanceFields, errorCodes []string, requirementsFactory *testreq.FakeReqFactory) {
+	startAppWithInstancesAndErrors := func(app models.Application, instances [][]models.AppInstanceFields, errorCodes []string) {
 		appRepo.UpdateAppResult = app
 		appRepo.ReadReturns.App = app
 		appInstancesRepo.GetInstancesResponses = instances
@@ -169,7 +160,7 @@ var _ = Describe("start command", func() {
 
 		Describe("when the staging timeout is zero seconds", func() {
 			BeforeEach(func() {
-				cmd.StagingTimeout = 0 // FIXME: why was this '1' ???
+				cmd.StagingTimeout = 0
 				cmd.PingerThrottle = 1
 				cmd.StartupTimeout = 1
 			})
@@ -192,12 +183,12 @@ var _ = Describe("start command", func() {
 		BeforeEach(func() {
 			requirementsFactory.LoginSuccess = true
 			cmd.StagingTimeout = 50 * time.Millisecond
-			cmd.StartupTimeout = 100 * time.Millisecond
+			cmd.StartupTimeout = 50 * time.Millisecond
 			cmd.PingerThrottle = 50 * time.Millisecond
 		})
 
 		It("starts an app, when given the app's name", func() {
-			startAppWithInstancesAndErrors(appDisplayer, defaultAppForStart, defaultInstanceReponses, defaultInstanceErrorCodes, requirementsFactory)
+			startAppWithInstancesAndErrors(defaultAppForStart, defaultInstanceReponses, defaultInstanceErrorCodes)
 
 			Expect(ui.Outputs).To(ContainSubstrings(
 				[]string{"my-app", "my-org", "my-space", "my-user"},
@@ -265,7 +256,7 @@ var _ = Describe("start command", func() {
 
 			errorCodes := []string{errors.APP_NOT_STAGED, errors.APP_NOT_STAGED, "", "", ""}
 
-			startAppWithInstancesAndErrors(appDisplayer, defaultAppForStart, instances, errorCodes, requirementsFactory)
+			startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
 
 			Expect(appInstancesRepo.GetInstancesAppGuid).To(Equal("my-app-guid"))
 
@@ -280,7 +271,7 @@ var _ = Describe("start command", func() {
 			instances := [][]models.AppInstanceFields{[]models.AppInstanceFields{}}
 			errorCodes := []string{"170001"}
 
-			startAppWithInstancesAndErrors(appDisplayer, defaultAppForStart, instances, errorCodes, requirementsFactory)
+			startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
 
 			Expect(ui.Outputs).To(ContainSubstrings(
 				[]string{"my-app"},
@@ -307,7 +298,7 @@ var _ = Describe("start command", func() {
 
 				errorCodes := []string{"", ""}
 
-				startAppWithInstancesAndErrors(appDisplayer, defaultAppForStart, instances, errorCodes, requirementsFactory)
+				startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
 
 				Expect(ui.Outputs).To(ContainSubstrings(
 					[]string{"my-app"},
@@ -340,7 +331,7 @@ var _ = Describe("start command", func() {
 
 			errorCodes := []string{errors.APP_NOT_STAGED, errors.APP_NOT_STAGED, errors.APP_NOT_STAGED}
 
-			startAppWithInstancesAndErrors(appDisplayer, defaultAppForStart, instances, errorCodes, requirementsFactory)
+			startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
 
 			Expect(ui.Outputs).To(ContainSubstrings(
 				[]string{"Starting", "my-app"},
