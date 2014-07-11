@@ -26,7 +26,7 @@ var _ = FDescribe("start command", func() {
 	var (
 		ui                        *testterm.FakeUI
 		cmd                       *Start
-		defaultAppForStart        = models.Application{}
+		app                       = models.Application{}
 		defaultInstanceReponses   = [][]models.AppInstanceFields{}
 		defaultInstanceErrorCodes = []string{"", ""}
 		requirementsFactory       *testreq.FakeReqFactory
@@ -51,9 +51,10 @@ var _ = FDescribe("start command", func() {
 		appInstancesRepo = &testapi.FakeAppInstancesRepo{}
 		logRepo = &testapi.FakeLogsRepository{}
 
-		defaultAppForStart.Name = "my-app"
-		defaultAppForStart.Guid = "my-app-guid"
-		defaultAppForStart.InstanceCount = 2
+		app = models.Application{}
+		app.Name = "my-app"
+		app.Guid = "my-app-guid"
+		app.InstanceCount = 2
 
 		domain := models.DomainFields{}
 		domain.Name = "example.com"
@@ -62,7 +63,7 @@ var _ = FDescribe("start command", func() {
 		route.Host = "my-app"
 		route.Domain = domain
 
-		defaultAppForStart.Routes = []models.RouteSummary{route}
+		app.Routes = []models.RouteSummary{route}
 
 		starting := models.AppInstanceFields{State: models.InstanceStarting}
 		running := models.AppInstanceFields{State: models.InstanceRunning}
@@ -113,7 +114,6 @@ var _ = FDescribe("start command", func() {
 
 	Describe("timeouts", func() {
 		BeforeEach(func() {
-			app := defaultAppForStart
 			appRepo.UpdateAppResult = app
 			appRepo.ReadReturns.App = app
 			requirementsFactory.Application = app
@@ -144,8 +144,6 @@ var _ = FDescribe("start command", func() {
 		Describe("when the staging timeout is zero seconds", func() {
 			BeforeEach(func() {
 				cmd.StagingTimeout = 0
-				cmd.PingerThrottle = 1
-				cmd.StartupTimeout = 1
 			})
 
 			It("can still respond to staging failures", func() {
@@ -153,8 +151,6 @@ var _ = FDescribe("start command", func() {
 				testcmd.RunCommand(cmd, []string{"my-app"}, requirementsFactory)
 
 				Expect(ui.Outputs).To(ContainSubstrings(
-					[]string{"my-app"},
-					[]string{"OK"},
 					[]string{"FAILED"},
 					[]string{"Error staging app"},
 				))
@@ -165,6 +161,8 @@ var _ = FDescribe("start command", func() {
 	Context("when logged in", func() {
 		BeforeEach(func() {
 			requirementsFactory.LoginSuccess = true
+
+			// FIXME: shouldn't need to overwrite these under test
 			cmd.StagingTimeout = 50 * time.Millisecond
 			cmd.StartupTimeout = 50 * time.Millisecond
 			cmd.PingerThrottle = 50 * time.Millisecond
@@ -172,9 +170,9 @@ var _ = FDescribe("start command", func() {
 
 		Context("when an app with the given name exists", func() {
 			BeforeEach(func() {
-				appRepo.UpdateAppResult = defaultAppForStart
-				appRepo.ReadReturns.App = defaultAppForStart
-				requirementsFactory.Application = defaultAppForStart
+				appRepo.UpdateAppResult = app
+				appRepo.ReadReturns.App = app
+				requirementsFactory.Application = app
 				appInstancesRepo.GetInstancesResponses = defaultInstanceReponses
 				appInstancesRepo.GetInstancesErrorCodes = defaultInstanceErrorCodes
 
@@ -182,10 +180,10 @@ var _ = FDescribe("start command", func() {
 				wrongSourceName := "DEA"
 				correctSourceName := "STG"
 				logRepo.TailLogMessages = []*logmessage.LogMessage{
-					testlogs.NewLogMessage("Log Line 1", defaultAppForStart.Guid, wrongSourceName, currentTime),
-					testlogs.NewLogMessage("Log Line 2", defaultAppForStart.Guid, correctSourceName, currentTime),
-					testlogs.NewLogMessage("Log Line 3", defaultAppForStart.Guid, correctSourceName, currentTime),
-					testlogs.NewLogMessage("Log Line 4", defaultAppForStart.Guid, wrongSourceName, currentTime),
+					testlogs.NewLogMessage("Log Line 1", app.Guid, wrongSourceName, currentTime),
+					testlogs.NewLogMessage("Log Line 2", app.Guid, correctSourceName, currentTime),
+					testlogs.NewLogMessage("Log Line 3", app.Guid, correctSourceName, currentTime),
+					testlogs.NewLogMessage("Log Line 4", app.Guid, wrongSourceName, currentTime),
 				}
 			})
 
@@ -201,7 +199,7 @@ var _ = FDescribe("start command", func() {
 
 				Expect(requirementsFactory.ApplicationName).To(Equal("my-app"))
 				Expect(appRepo.UpdateAppGuid).To(Equal("my-app-guid"))
-				Expect(appDisplayer.AppToDisplay).To(Equal(defaultAppForStart))
+				Expect(appDisplayer.AppToDisplay).To(Equal(app))
 			})
 
 			It("only displays staging logs when an app is starting", func() {
@@ -237,8 +235,8 @@ var _ = FDescribe("start command", func() {
 					}
 
 					logRepo.TailLogMessages = []*logmessage.LogMessage{
-						testlogs.NewLogMessage("Log Line 1", defaultAppForStart.Guid, LogMessageTypeStaging, time.Now()),
-						testlogs.NewLogMessage("Log Line 2", defaultAppForStart.Guid, LogMessageTypeStaging, time.Now()),
+						testlogs.NewLogMessage("Log Line 1", app.Guid, LogMessageTypeStaging, time.Now()),
+						testlogs.NewLogMessage("Log Line 2", app.Guid, LogMessageTypeStaging, time.Now()),
 					}
 
 				})
@@ -322,55 +320,49 @@ var _ = FDescribe("start command", func() {
 					Expect(ui.Outputs).ToNot(ContainSubstrings([]string{"instances running"}))
 				})
 			})
-		})
 
-		It("tells the user about the failure when starting the app fails", func() {
-			app := models.Application{}
-			app.Name = "my-app"
-			app.Guid = "my-app-guid"
+			Context("when starting the app fails", func() {
+				BeforeEach(func() {
+					appRepo.UpdateErr = true
+				})
 
-			appRepo.UpdateErr = true
-			appRepo.ReadReturns.App = app
-			requirementsFactory.Application = app
+				It("tells the user about the failure when starting the app fails", func() {
+					runCommand("my-app")
 
-			runCommand("my-app")
-			Expect(ui.Outputs).To(ContainSubstrings(
-				[]string{"my-app"},
-				[]string{"FAILED"},
-				[]string{"Error updating app."},
-			))
-			Expect(appRepo.UpdateAppGuid).To(Equal("my-app-guid"))
-		})
+					Expect(ui.Outputs).To(ContainSubstrings(
+						[]string{"my-app"},
+						[]string{"FAILED"},
+						[]string{"Error updating app."},
+					))
+				})
+			})
 
-		It("warns the user when the app is already running", func() {
-			app := models.Application{}
-			app.Name = "my-app"
-			app.Guid = "my-app-guid"
-			app.State = "started"
+			Context("when the app is already running", func() {
+				BeforeEach(func() {
+					requirementsFactory.Application.State = "started"
+				})
 
-			appRepo.ReadReturns.App = app
-			requirementsFactory.Application = app
+				It("warns the user when the app is already running", func() {
+					runCommand("my-app")
 
-			runCommand("my-app")
+					Expect(ui.Outputs).To(ContainSubstrings(
+						[]string{"my-app", "is already started"}),
+					)
+					Expect(appRepo.UpdateAppGuid).To(Equal(""))
+				})
+			})
 
-			Expect(ui.Outputs).To(ContainSubstrings([]string{"my-app", "is already started"}))
-			Expect(appRepo.UpdateAppGuid).To(Equal(""))
-		})
+			Context("when connecting to the loggregator server fails", func() {
+				It("fails and tells the user", func() {
+					logRepo.TailLogErr = errors.New("Ooops")
+					runCommand("my-app")
 
-		It("tells the user when connecting to the log server fails", func() {
-			appRepo.ReadReturns.App = defaultAppForStart
-			appInstancesRepo.GetInstancesResponses = defaultInstanceReponses
-			appInstancesRepo.GetInstancesErrorCodes = defaultInstanceErrorCodes
-
-			logRepo.TailLogErr = errors.New("Ooops")
-			requirementsFactory.Application = defaultAppForStart
-
-			runCommand("my-app")
-
-			Expect(ui.Outputs).To(ContainSubstrings(
-				[]string{"error tailing logs"},
-				[]string{"Ooops"},
-			))
+					Expect(ui.Outputs).To(ContainSubstrings(
+						[]string{"error tailing logs"},
+						[]string{"Ooops"},
+					))
+				})
+			})
 		})
 	})
 })
