@@ -36,11 +36,14 @@ var _ = Describe("start command", func() {
 		appDisplayer              *testcmd.FakeAppDisplayer
 		appInstancesRepo          *testapi.FakeAppInstancesRepo
 		logRepo                   *testapi.FakeLogsRepository
+
+		clockDestroyer chan bool
 	)
 
 	BeforeEach(func() {
 		ui = &testterm.FakeUI{}
 		mockClock = &clock.FakeClock{}
+		clockDestroyer = make(chan bool, 1)
 		requirementsFactory = &testreq.FakeReqFactory{}
 		configRepo = testconfig.NewRepositoryWithDefaults()
 		appDisplayer = &testcmd.FakeAppDisplayer{}
@@ -86,15 +89,24 @@ var _ = Describe("start command", func() {
 		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
 
-	runTheClock := func() {
+	runTheClock := func(stopChannel chan bool) {
 		for {
 			select {
 			case <-time.After(time.Millisecond * 10):
-				println("TICK")
 				mockClock.Tick()
+			case <-stopChannel:
+				return
 			}
 		}
 	}
+
+	BeforeEach(func() {
+		go runTheClock(clockDestroyer)
+	})
+
+	AfterEach(func() {
+		clockDestroyer <- true
+	})
 
 	// FIXME: KILL THIS FUNCTION
 	startAppWithInstancesAndErrors := func(appDisplayer ApplicationDisplayer, app models.Application, instances [][]models.AppInstanceFields, errorCodes []string, requirementsFactory *testreq.FakeReqFactory) {
@@ -113,7 +125,7 @@ var _ = Describe("start command", func() {
 		return
 	}
 
-	FDescribe("requirements", func() {
+	Describe("requirements", func() {
 		It("fails requirements when not logged in", func() {
 			runCommand("some-app-name")
 			Expect(testcmd.CommandDidPassRequirements).To(BeFalse())
@@ -125,7 +137,7 @@ var _ = Describe("start command", func() {
 		})
 	})
 
-	FDescribe("timeouts", func() {
+	Describe("timeouts", func() {
 		BeforeEach(func() {
 			app := defaultAppForStart
 			appRepo.UpdateAppResult = app
@@ -184,7 +196,7 @@ var _ = Describe("start command", func() {
 			cmd.PingerThrottle = 50 * time.Millisecond
 		})
 
-		FIt("starts an app, when given the app's name", func() {
+		It("starts an app, when given the app's name", func() {
 			startAppWithInstancesAndErrors(appDisplayer, defaultAppForStart, defaultInstanceReponses, defaultInstanceErrorCodes, requirementsFactory)
 
 			Expect(ui.Outputs).To(ContainSubstrings(
@@ -308,8 +320,6 @@ var _ = Describe("start command", func() {
 		})
 
 		It("tells the user about the failure when waiting for the app to start times out", func() {
-			go runTheClock()
-
 			appInstance := models.AppInstanceFields{}
 			appInstance.State = models.InstanceStarting
 			appInstance2 := models.AppInstanceFields{}
@@ -375,8 +385,6 @@ var _ = Describe("start command", func() {
 		})
 
 		It("tells the user when connecting to the log server fails", func() {
-			go runTheClock()
-
 			appRepo.ReadReturns.App = defaultAppForStart
 			appInstancesRepo.GetInstancesResponses = defaultInstanceReponses
 			appInstancesRepo.GetInstancesErrorCodes = defaultInstanceErrorCodes
