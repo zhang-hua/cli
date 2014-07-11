@@ -5,9 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/cloudfoundry/cli/cf"
-	"github.com/cloudfoundry/cli/cf/configuration"
-	"github.com/cloudfoundry/cli/cf/errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -16,6 +13,10 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/cloudfoundry/cli/cf"
+	"github.com/cloudfoundry/cli/cf/configuration"
+	"github.com/cloudfoundry/cli/cf/errors"
 )
 
 const (
@@ -47,8 +48,9 @@ type tokenRefresher interface {
 }
 
 type Request struct {
-	HttpReq      *http.Request
-	SeekableBody io.ReadSeeker
+	HttpReq               *http.Request
+	SeekableBody          io.ReadSeeker
+	ResponseHeaderTimeout time.Duration
 }
 
 type Gateway struct {
@@ -212,7 +214,11 @@ func (gateway Gateway) NewRequest(method, path, accessToken string, body io.Read
 		}
 	}
 
-	req = &Request{HttpReq: request, SeekableBody: body}
+	req = &Request{
+		HttpReq:               request,
+		SeekableBody:          body,
+		ResponseHeaderTimeout: 30 * time.Second,
+	}
 	return
 }
 
@@ -370,7 +376,8 @@ func (gateway Gateway) doRequestHandlingAuth(request *Request) (rawResponse *htt
 }
 
 func (gateway Gateway) doRequestAndHandlerError(request *Request) (rawResponse *http.Response, err error) {
-	rawResponse, err = gateway.doRequest(request.HttpReq)
+	rawResponse, err = gateway.doRequest(request)
+
 	if err != nil {
 		err = WrapNetworkErrors(request.HttpReq.URL.Host, err)
 		return
@@ -386,12 +393,15 @@ func (gateway Gateway) doRequestAndHandlerError(request *Request) (rawResponse *
 	return
 }
 
-func (gateway Gateway) doRequest(request *http.Request) (response *http.Response, err error) {
+func (gateway Gateway) doRequest(request *Request) (response *http.Response, err error) {
 	httpClient := newHttpClient(gateway.trustedCerts, gateway.config.IsSSLDisabled())
 
-	dumpRequest(request)
+	transport := httpClient.Transport.(*http.Transport)
+	transport.ResponseHeaderTimeout = request.ResponseHeaderTimeout
 
-	response, err = httpClient.Do(request)
+	dumpRequest(request.HttpReq)
+
+	response, err = httpClient.Do(request.HttpReq)
 	if err != nil {
 		return
 	}

@@ -79,6 +79,10 @@ var _ = Describe("Gateway", func() {
 		It("sets the user agent header", func() {
 			Expect(request.HttpReq.Header.Get("User-Agent")).To(Equal("go-cli " + cf.Version + " / " + runtime.GOOS))
 		})
+
+		It("sets the response header timeout to something reasonable by default", func() {
+			Expect(request.ResponseHeaderTimeout).To(Equal(5 * time.Second))
+		})
 	})
 
 	Describe("CRUD methods", func() {
@@ -501,6 +505,45 @@ var _ = Describe("Gateway", func() {
 
 		It("defaults warnings to an empty slice", func() {
 			Expect(ccGateway.Warnings()).ToNot(BeNil())
+		})
+	})
+
+	Describe("timeout receiving headers", func() {
+		var (
+			server *httptest.Server
+		)
+
+		Context("when the server takes approximately forever to return headers", func() {
+			killTheRoutine := make(chan bool)
+
+			BeforeEach(func() {
+				server = httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+					for {
+						select {
+						case <-time.After(time.Minute * 3600):
+							fmt.Fprintln(writer, "I'm sorry, Dave.")
+							writer.WriteHeader(http.StatusOK)
+						case <-killTheRoutine:
+							return
+						}
+					}
+				}))
+			})
+
+			AfterEach(func() {
+				server.Close()
+			})
+
+			It("times out and returns an error", func() {
+				request, err := ccGateway.NewRequest("GET", server.URL, config.AccessToken(), nil)
+				Expect(err).ToNot(HaveOccurred())
+
+				request.ResponseHeaderTimeout = 10 * time.Millisecond
+				_, err = ccGateway.PerformRequest(request)
+				Expect(err).To(HaveOccurred())
+
+				killTheRoutine <- true
+			})
 		})
 	})
 })
