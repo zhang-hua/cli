@@ -103,6 +103,7 @@ var _ = FDescribe("start command", func() {
 	startAppWithInstancesAndErrors := func(app models.Application, instances [][]models.AppInstanceFields, errorCodes []string) {
 		appRepo.UpdateAppResult = app
 		appRepo.ReadReturns.App = app
+		requirementsFactory.Application = app
 		appInstancesRepo.GetInstancesResponses = instances
 		appInstancesRepo.GetInstancesErrorCodes = errorCodes
 
@@ -111,7 +112,6 @@ var _ = FDescribe("start command", func() {
 			testlogs.NewLogMessage("Log Line 2", app.Guid, LogMessageTypeStaging, time.Now()),
 		}
 
-		requirementsFactory.Application = app
 		runCommand("my-app")
 		return
 	}
@@ -187,159 +187,163 @@ var _ = FDescribe("start command", func() {
 			cmd.PingerThrottle = 50 * time.Millisecond
 		})
 
-		It("starts an app, when given the app's name", func() {
-			startAppWithInstancesAndErrors(defaultAppForStart, defaultInstanceReponses, defaultInstanceErrorCodes)
+		Context("when an app with the given name exists", func() {
+			BeforeEach(func() {
+				appRepo.UpdateAppResult = defaultAppForStart
+				appRepo.ReadReturns.App = defaultAppForStart
+				requirementsFactory.Application = defaultAppForStart
+				appInstancesRepo.GetInstancesResponses = defaultInstanceReponses
+				appInstancesRepo.GetInstancesErrorCodes = defaultInstanceErrorCodes
 
-			Expect(ui.Outputs).To(ContainSubstrings(
-				[]string{"my-app", "my-org", "my-space", "my-user"},
-				[]string{"OK"},
-				[]string{"0 of 2 instances running", "2 starting"},
-				[]string{"started"},
-			))
-
-			Expect(requirementsFactory.ApplicationName).To(Equal("my-app"))
-			Expect(appRepo.UpdateAppGuid).To(Equal("my-app-guid"))
-			Expect(appDisplayer.AppToDisplay).To(Equal(defaultAppForStart))
-		})
-
-		It("only displays staging logs when an app is starting", func() {
-			requirementsFactory.Application = defaultAppForStart
-			appRepo.UpdateAppResult = defaultAppForStart
-			appRepo.ReadReturns.App = defaultAppForStart
-
-			appInstancesRepo.GetInstancesResponses = defaultInstanceReponses
-			appInstancesRepo.GetInstancesErrorCodes = defaultInstanceErrorCodes
-
-			currentTime := time.Now()
-			wrongSourceName := "DEA"
-			correctSourceName := "STG"
-
-			logRepo.TailLogMessages = []*logmessage.LogMessage{
-				testlogs.NewLogMessage("Log Line 1", defaultAppForStart.Guid, wrongSourceName, currentTime),
-				testlogs.NewLogMessage("Log Line 2", defaultAppForStart.Guid, correctSourceName, currentTime),
-				testlogs.NewLogMessage("Log Line 3", defaultAppForStart.Guid, correctSourceName, currentTime),
-				testlogs.NewLogMessage("Log Line 4", defaultAppForStart.Guid, wrongSourceName, currentTime),
-			}
-
-			runCommand("my-app")
-
-			Expect(ui.Outputs).To(ContainSubstrings(
-				[]string{"Log Line 2"},
-				[]string{"Log Line 3"},
-			))
-			Expect(ui.Outputs).ToNot(ContainSubstrings(
-				[]string{"Log Line 1"},
-				[]string{"Log Line 4"},
-			))
-		})
-
-		It("gracefully handles starting an app that is still staging", func() {
-			appInstance := models.AppInstanceFields{}
-			appInstance.State = models.InstanceDown
-			appInstance2 := models.AppInstanceFields{}
-			appInstance2.State = models.InstanceStarting
-			appInstance3 := models.AppInstanceFields{}
-			appInstance3.State = models.InstanceStarting
-			appInstance4 := models.AppInstanceFields{}
-			appInstance4.State = models.InstanceStarting
-			appInstance5 := models.AppInstanceFields{}
-			appInstance5.State = models.InstanceRunning
-			appInstance6 := models.AppInstanceFields{}
-			appInstance6.State = models.InstanceRunning
-			instances := [][]models.AppInstanceFields{
-				[]models.AppInstanceFields{},
-				[]models.AppInstanceFields{},
-				[]models.AppInstanceFields{appInstance, appInstance2},
-				[]models.AppInstanceFields{appInstance3, appInstance4},
-				[]models.AppInstanceFields{appInstance5, appInstance6},
-			}
-
-			errorCodes := []string{errors.APP_NOT_STAGED, errors.APP_NOT_STAGED, "", "", ""}
-
-			startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
-
-			Expect(appInstancesRepo.GetInstancesAppGuid).To(Equal("my-app-guid"))
-
-			Expect(ui.Outputs).To(ContainSubstrings(
-				[]string{"Log Line 1"},
-				[]string{"Log Line 2"},
-				[]string{"0 of 2 instances running", "2 starting"},
-			))
-		})
-
-		It("displays an error message when staging fails", func() {
-			instances := [][]models.AppInstanceFields{[]models.AppInstanceFields{}}
-			errorCodes := []string{"170001"}
-
-			startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
-
-			Expect(ui.Outputs).To(ContainSubstrings(
-				[]string{"my-app"},
-				[]string{"OK"},
-				[]string{"FAILED"},
-				[]string{"Error staging app"},
-			))
-		})
-
-		Context("when an app instance is flapping", func() {
-			It("fails and alerts the user", func() {
-				appInstance := models.AppInstanceFields{}
-				appInstance.State = models.InstanceStarting
-				appInstance2 := models.AppInstanceFields{}
-				appInstance2.State = models.InstanceStarting
-				appInstance3 := models.AppInstanceFields{}
-				appInstance3.State = models.InstanceStarting
-				appInstance4 := models.AppInstanceFields{}
-				appInstance4.State = models.InstanceFlapping
-				instances := [][]models.AppInstanceFields{
-					[]models.AppInstanceFields{appInstance, appInstance2},
-					[]models.AppInstanceFields{appInstance3, appInstance4},
+				currentTime := time.Now()
+				wrongSourceName := "DEA"
+				correctSourceName := "STG"
+				logRepo.TailLogMessages = []*logmessage.LogMessage{
+					testlogs.NewLogMessage("Log Line 1", defaultAppForStart.Guid, wrongSourceName, currentTime),
+					testlogs.NewLogMessage("Log Line 2", defaultAppForStart.Guid, correctSourceName, currentTime),
+					testlogs.NewLogMessage("Log Line 3", defaultAppForStart.Guid, correctSourceName, currentTime),
+					testlogs.NewLogMessage("Log Line 4", defaultAppForStart.Guid, wrongSourceName, currentTime),
 				}
+			})
 
-				errorCodes := []string{"", ""}
-
-				startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
+			It("starts an app, when given the app's name", func() {
+				runCommand("my-app")
 
 				Expect(ui.Outputs).To(ContainSubstrings(
-					[]string{"my-app"},
+					[]string{"my-app", "my-org", "my-space", "my-user"},
 					[]string{"OK"},
-					[]string{"0 of 2 instances running", "1 starting", "1 failing"},
-					[]string{"FAILED"},
-					[]string{"Start unsuccessful"},
+					[]string{"0 of 2 instances running", "2 starting"},
+					[]string{"started"},
+				))
+
+				Expect(requirementsFactory.ApplicationName).To(Equal("my-app"))
+				Expect(appRepo.UpdateAppGuid).To(Equal("my-app-guid"))
+				Expect(appDisplayer.AppToDisplay).To(Equal(defaultAppForStart))
+			})
+
+			It("only displays staging logs when an app is starting", func() {
+				runCommand("my-app")
+
+				Expect(ui.Outputs).To(ContainSubstrings(
+					[]string{"Log Line 2"},
+					[]string{"Log Line 3"},
+				))
+				Expect(ui.Outputs).ToNot(ContainSubstrings(
+					[]string{"Log Line 1"},
+					[]string{"Log Line 4"},
 				))
 			})
-		})
 
-		It("tells the user about the failure when waiting for the app to start times out", func() {
-			appInstance := models.AppInstanceFields{}
-			appInstance.State = models.InstanceStarting
-			appInstance2 := models.AppInstanceFields{}
-			appInstance2.State = models.InstanceStarting
-			appInstance3 := models.AppInstanceFields{}
-			appInstance3.State = models.InstanceStarting
-			appInstance4 := models.AppInstanceFields{}
-			appInstance4.State = models.InstanceDown
-			appInstance5 := models.AppInstanceFields{}
-			appInstance5.State = models.InstanceDown
-			appInstance6 := models.AppInstanceFields{}
-			appInstance6.State = models.InstanceDown
-			instances := [][]models.AppInstanceFields{
-				[]models.AppInstanceFields{appInstance, appInstance2},
-				[]models.AppInstanceFields{appInstance3, appInstance4},
-				[]models.AppInstanceFields{appInstance5, appInstance6},
-			}
+			Context("when the app is still staging", func() {
+				BeforeEach(func() {
+					down := models.AppInstanceFields{State: models.InstanceDown}
+					starting := models.AppInstanceFields{State: models.InstanceStarting}
+					running := models.AppInstanceFields{State: models.InstanceRunning}
 
-			errorCodes := []string{errors.APP_NOT_STAGED, errors.APP_NOT_STAGED, errors.APP_NOT_STAGED}
+					appInstancesRepo.GetInstancesResponses = [][]models.AppInstanceFields{
+						[]models.AppInstanceFields{},
+						[]models.AppInstanceFields{},
+						[]models.AppInstanceFields{down, starting},
+						[]models.AppInstanceFields{starting, starting},
+						[]models.AppInstanceFields{running, running},
+					}
+					appInstancesRepo.GetInstancesErrorCodes = []string{
+						errors.APP_NOT_STAGED,
+						errors.APP_NOT_STAGED,
+						"", "", "",
+					}
 
-			startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
+					logRepo.TailLogMessages = []*logmessage.LogMessage{
+						testlogs.NewLogMessage("Log Line 1", defaultAppForStart.Guid, LogMessageTypeStaging, time.Now()),
+						testlogs.NewLogMessage("Log Line 2", defaultAppForStart.Guid, LogMessageTypeStaging, time.Now()),
+					}
 
-			Expect(ui.Outputs).To(ContainSubstrings(
-				[]string{"Starting", "my-app"},
-				[]string{"OK"},
-				[]string{"FAILED"},
-				[]string{"Start app timeout"},
-			))
-			Expect(ui.Outputs).ToNot(ContainSubstrings([]string{"instances running"}))
+				})
+
+				It("gracefully handles starting the app", func() {
+					runCommand("my-app")
+
+					Expect(appInstancesRepo.GetInstancesAppGuid).To(Equal("my-app-guid"))
+					Expect(ui.Outputs).To(ContainSubstrings(
+						[]string{"Log Line 1"},
+						[]string{"Log Line 2"},
+						[]string{"0 of 2 instances running", "2 starting"},
+					))
+				})
+			})
+
+			Context("when staging the app fails", func() {
+				BeforeEach(func() {
+					appInstancesRepo.GetInstancesResponses = [][]models.AppInstanceFields{}
+					appInstancesRepo.GetInstancesErrorCodes = []string{"170001"}
+				})
+
+				It("displays an error message when staging fails", func() {
+					runCommand("my-app")
+
+					Expect(ui.Outputs).To(ContainSubstrings(
+						[]string{"FAILED"},
+						[]string{"Error staging app"},
+					))
+				})
+			})
+
+			Context("when an app instance is flapping", func() {
+				It("fails and alerts the user", func() {
+					appInstance := models.AppInstanceFields{}
+					appInstance.State = models.InstanceStarting
+					appInstance2 := models.AppInstanceFields{}
+					appInstance2.State = models.InstanceStarting
+					appInstance3 := models.AppInstanceFields{}
+					appInstance3.State = models.InstanceStarting
+					appInstance4 := models.AppInstanceFields{}
+					appInstance4.State = models.InstanceFlapping
+					instances := [][]models.AppInstanceFields{
+						[]models.AppInstanceFields{appInstance, appInstance2},
+						[]models.AppInstanceFields{appInstance3, appInstance4},
+					}
+
+					errorCodes := []string{"", ""}
+
+					startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
+
+					Expect(ui.Outputs).To(ContainSubstrings(
+						[]string{"my-app"},
+						[]string{"OK"},
+						[]string{"0 of 2 instances running", "1 starting", "1 failing"},
+						[]string{"FAILED"},
+						[]string{"Start unsuccessful"},
+					))
+				})
+			})
+
+			Context("when waiting for the app to start times out", func() {
+				BeforeEach(func() {
+					down := models.AppInstanceFields{State: models.InstanceDown}
+					starting := models.AppInstanceFields{State: models.InstanceStarting}
+
+					appInstancesRepo.GetInstancesResponses = [][]models.AppInstanceFields{
+						[]models.AppInstanceFields{starting, starting},
+						[]models.AppInstanceFields{starting, down},
+						[]models.AppInstanceFields{down, down},
+					}
+					appInstancesRepo.GetInstancesErrorCodes = []string{
+						errors.APP_NOT_STAGED,
+						errors.APP_NOT_STAGED,
+						errors.APP_NOT_STAGED,
+					}
+				})
+
+				It("fails tells the user about it", func() {
+					runCommand("my-app")
+
+					Expect(ui.Outputs).To(ContainSubstrings(
+						[]string{"FAILED"},
+						[]string{"Start app timeout"},
+					))
+					Expect(ui.Outputs).ToNot(ContainSubstrings([]string{"instances running"}))
+				})
+			})
 		})
 
 		It("tells the user about the failure when starting the app fails", func() {
