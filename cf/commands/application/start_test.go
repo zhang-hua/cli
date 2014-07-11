@@ -99,23 +99,6 @@ var _ = FDescribe("start command", func() {
 		clockDestroyer <- true
 	})
 
-	// FIXME: KILL THIS FUNCTION
-	startAppWithInstancesAndErrors := func(app models.Application, instances [][]models.AppInstanceFields, errorCodes []string) {
-		appRepo.UpdateAppResult = app
-		appRepo.ReadReturns.App = app
-		requirementsFactory.Application = app
-		appInstancesRepo.GetInstancesResponses = instances
-		appInstancesRepo.GetInstancesErrorCodes = errorCodes
-
-		logRepo.TailLogMessages = []*logmessage.LogMessage{
-			testlogs.NewLogMessage("Log Line 1", app.Guid, LogMessageTypeStaging, time.Now()),
-			testlogs.NewLogMessage("Log Line 2", app.Guid, LogMessageTypeStaging, time.Now()),
-		}
-
-		runCommand("my-app")
-		return
-	}
-
 	Describe("requirements", func() {
 		It("fails requirements when not logged in", func() {
 			runCommand("some-app-name")
@@ -289,27 +272,22 @@ var _ = FDescribe("start command", func() {
 			})
 
 			Context("when an app instance is flapping", func() {
-				It("fails and alerts the user", func() {
-					appInstance := models.AppInstanceFields{}
-					appInstance.State = models.InstanceStarting
-					appInstance2 := models.AppInstanceFields{}
-					appInstance2.State = models.InstanceStarting
-					appInstance3 := models.AppInstanceFields{}
-					appInstance3.State = models.InstanceStarting
-					appInstance4 := models.AppInstanceFields{}
-					appInstance4.State = models.InstanceFlapping
-					instances := [][]models.AppInstanceFields{
-						[]models.AppInstanceFields{appInstance, appInstance2},
-						[]models.AppInstanceFields{appInstance3, appInstance4},
+				BeforeEach(func() {
+					starting := models.AppInstanceFields{State: models.InstanceStarting}
+					flapping := models.AppInstanceFields{State: models.InstanceFlapping}
+
+					appInstancesRepo.GetInstancesResponses = [][]models.AppInstanceFields{
+						[]models.AppInstanceFields{starting, starting},
+						[]models.AppInstanceFields{starting, flapping},
 					}
+					appInstancesRepo.GetInstancesErrorCodes = []string{"", ""}
 
-					errorCodes := []string{"", ""}
+				})
 
-					startAppWithInstancesAndErrors(defaultAppForStart, instances, errorCodes)
+				It("fails and alerts the user", func() {
+					runCommand("my-app")
 
 					Expect(ui.Outputs).To(ContainSubstrings(
-						[]string{"my-app"},
-						[]string{"OK"},
 						[]string{"0 of 2 instances running", "1 starting", "1 failing"},
 						[]string{"FAILED"},
 						[]string{"Start unsuccessful"},
