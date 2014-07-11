@@ -26,6 +26,7 @@ var _ = FDescribe("start command", func() {
 	var (
 		ui                        *testterm.FakeUI
 		cmd                       *Start
+		mockClock                 = &clock.FakeClock{}
 		app                       = models.Application{}
 		defaultInstanceReponses   = [][]models.AppInstanceFields{}
 		defaultInstanceErrorCodes = []string{"", ""}
@@ -35,15 +36,10 @@ var _ = FDescribe("start command", func() {
 		appDisplayer              *testcmd.FakeAppDisplayer
 		appInstancesRepo          *testapi.FakeAppInstancesRepo
 		logRepo                   *testapi.FakeLogsRepository
-
-		clockDestroyer chan bool
 	)
-
-	mockClock := &clock.FakeClock{}
 
 	BeforeEach(func() {
 		ui = &testterm.FakeUI{}
-		clockDestroyer = make(chan bool, 1)
 		requirementsFactory = &testreq.FakeReqFactory{}
 		configRepo = testconfig.NewRepositoryWithDefaults()
 		appDisplayer = &testcmd.FakeAppDisplayer{}
@@ -80,25 +76,6 @@ var _ = FDescribe("start command", func() {
 	runCommand := func(args ...string) {
 		testcmd.RunCommand(cmd, args, requirementsFactory)
 	}
-
-	runTheClock := func(stopChannel chan bool) {
-		for {
-			select {
-			case <-time.After(time.Millisecond * 100):
-				mockClock.Tick()
-			case <-stopChannel:
-				return
-			}
-		}
-	}
-
-	BeforeEach(func() {
-		go runTheClock(clockDestroyer)
-	})
-
-	AfterEach(func() {
-		clockDestroyer <- true
-	})
 
 	Describe("requirements", func() {
 		It("fails requirements when not logged in", func() {
@@ -294,6 +271,8 @@ var _ = FDescribe("start command", func() {
 			})
 
 			Context("when waiting for the app to start times out", func() {
+				var clockDestroyer chan bool
+
 				BeforeEach(func() {
 					down := models.AppInstanceFields{State: models.InstanceDown}
 					starting := models.AppInstanceFields{State: models.InstanceStarting}
@@ -308,9 +287,25 @@ var _ = FDescribe("start command", func() {
 						errors.APP_NOT_STAGED,
 						errors.APP_NOT_STAGED,
 					}
+
+					clockDestroyer = make(chan bool, 1)
+					go func(stopChannel chan bool) {
+						for {
+							select {
+							case <-time.After(time.Millisecond * 100):
+								mockClock.Tick()
+							case <-stopChannel:
+								return
+							}
+						}
+					}(clockDestroyer)
 				})
 
-				It("fails tells the user about it", func() {
+				AfterEach(func() {
+					clockDestroyer <- true
+				})
+
+				It("fails and tells the user about it", func() {
 					runCommand("my-app")
 
 					Expect(ui.Outputs).To(ContainSubstrings(
