@@ -274,19 +274,7 @@ var _ = FDescribe("start command", func() {
 				var clockDestroyer chan bool
 
 				BeforeEach(func() {
-					down := models.AppInstanceFields{State: models.InstanceDown}
-					starting := models.AppInstanceFields{State: models.InstanceStarting}
-
-					appInstancesRepo.GetInstancesResponses = [][]models.AppInstanceFields{
-						[]models.AppInstanceFields{starting, starting},
-						[]models.AppInstanceFields{starting, down},
-						[]models.AppInstanceFields{down, down},
-					}
-					appInstancesRepo.GetInstancesErrorCodes = []string{
-						errors.APP_NOT_STAGED,
-						errors.APP_NOT_STAGED,
-						errors.APP_NOT_STAGED,
-					}
+					appInstancesRepo.GetInstancesErrorCodes = []string{errors.APP_NOT_STAGED}
 
 					clockDestroyer = make(chan bool, 1)
 					go func(stopChannel chan bool) {
