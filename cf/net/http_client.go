@@ -26,6 +26,7 @@ var (
 
 func newHttpClient(trustedCerts []tls.Certificate, disableSSL bool) *http.Client {
 	tr := &http.Transport{
+		Dial:            (&net.Dialer{Timeout: 10 * time.Second}).Dial,
 		TLSClientConfig: NewTLSConfig(trustedCerts, disableSSL),
 		Proxy:           http.ProxyFromEnvironment,
 	}

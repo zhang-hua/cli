@@ -81,7 +81,7 @@ var _ = Describe("Gateway", func() {
 		})
 
 		It("sets the response header timeout to something reasonable by default", func() {
-			Expect(request.ResponseHeaderTimeout).To(Equal(5 * time.Second))
+			Expect(request.ResponseHeaderTimeout).To(Equal(30 * time.Second))
 		})
 	})
 
