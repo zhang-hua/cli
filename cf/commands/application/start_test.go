@@ -30,7 +30,6 @@ var _ = FDescribe("start command", func() {
 		defaultInstanceReponses   = [][]models.AppInstanceFields{}
 		defaultInstanceErrorCodes = []string{"", ""}
 		requirementsFactory       *testreq.FakeReqFactory
-		mockClock                 *clock.FakeClock
 		configRepo                configuration.ReadWriter
 		appRepo                   *testapi.FakeApplicationRepository
 		appDisplayer              *testcmd.FakeAppDisplayer
@@ -40,9 +39,10 @@ var _ = FDescribe("start command", func() {
 		clockDestroyer chan bool
 	)
 
+	mockClock := &clock.FakeClock{}
+
 	BeforeEach(func() {
 		ui = &testterm.FakeUI{}
-		mockClock = &clock.FakeClock{}
 		clockDestroyer = make(chan bool, 1)
 		requirementsFactory = &testreq.FakeReqFactory{}
 		configRepo = testconfig.NewRepositoryWithDefaults()
