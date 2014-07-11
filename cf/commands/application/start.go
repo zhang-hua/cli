@@ -227,6 +227,10 @@ func (cmd Start) waitForOneRunningInstance(app models.Application) {
 	startupStartTime := cmd.clock.Now()
 
 	for {
+		// TODO: need a hook here (for tests) to advance the clock forward
+		//       or ... what if we could set the Since stub to advance by an amount each time????
+		//       e.g.: clock.SetTickByValue(whateverTheStartupTimeoutIs)
+
 		if cmd.clock.Since(startupStartTime) > cmd.StartupTimeout {
 			cmd.ui.Failed(fmt.Sprintf(T("Start app timeout\n\nTIP: use '{{.Command}}' for more information",
 				map[string]interface{}{
