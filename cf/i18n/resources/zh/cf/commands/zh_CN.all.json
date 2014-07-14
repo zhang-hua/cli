@@ -28,10 +28,6 @@
       "translation": "   CF_NAME login -u name@example.com -p pa55woRD (指定用户名和密码作为参数)\n"
    },
    {
-      "id": " target",
-      "translation": " 选择/指向"
-   },
-   {
       "id": "API endpoint",
       "translation": "API 终端"
    },
@@ -330,10 +326,6 @@
    {
       "id": "space",
       "translation": "空间"
-   },
-   {
-      "id": "username",
-      "translation": "用户名"
    },
    {
       "id": "write default values to the config",
