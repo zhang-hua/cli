@@ -32,6 +32,10 @@
       "translation": "路由"
    },
    {
+      "id": "SECURITY GROUP",
+      "translation": "SECURITY GROUP"
+   },
+   {
       "id": "SERVICE ADMIN",
       "translation": "服务管理员"
    },
