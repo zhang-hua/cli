@@ -6,6 +6,7 @@ import (
 	"github.com/cloudfoundry/cli/cf/api"
 	"github.com/cloudfoundry/cli/cf/command_metadata"
 	"github.com/cloudfoundry/cli/cf/configuration"
+	"github.com/cloudfoundry/cli/cf/models"
 	"github.com/cloudfoundry/cli/cf/requirements"
 	"github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/codegangsta/cli"
@@ -41,5 +42,18 @@ func (cmd *ServiceAccess) GetRequirements(requirementsFactory requirements.Facto
 }
 
 func (cmd *ServiceAccess) Run(c *cli.Context) {
-	fmt.Println("ptyalagogic-intercultural")
+	brokers := []models.ServiceBroker{}
+	apiErr := cmd.brokerRepo.ListServiceBrokers(func(serviceBroker models.ServiceBroker) bool {
+		brokers = append(brokers, serviceBroker)
+		return true
+	})
+
+	if apiErr != nil {
+		cmd.ui.Failed("Failed fetching service brokers.\n%s", apiErr)
+		return
+	}
+
+	for _, serviceBroker := range brokers {
+		cmd.ui.Say(fmt.Sprintf("broker: %s", serviceBroker.Name))
+	}
 }

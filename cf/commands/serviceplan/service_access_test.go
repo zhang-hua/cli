@@ -2,6 +2,7 @@ package serviceplan_test
 
 import (
 	testapi "github.com/cloudfoundry/cli/cf/api/fakes"
+	"github.com/cloudfoundry/cli/cf/models"
 	testcmd "github.com/cloudfoundry/cli/testhelpers/commands"
 	testconfig "github.com/cloudfoundry/cli/testhelpers/configuration"
 	testreq "github.com/cloudfoundry/cli/testhelpers/requirements"
@@ -38,4 +39,17 @@ var _ = Describe("service-access command", func() {
 		})
 	})
 
+	Describe("when logged in", func() {
+		BeforeEach(func() {
+			serviceBrokers := []models.ServiceBroker{
+				{Guid: "broker1", Name: "brokername1"},
+				{Guid: "broker2", Name: "brokername2"},
+			}
+			brokerRepo.ServiceBrokers = serviceBrokers
+		})
+		It("prints all of the brokers", func() {
+			runCommand()
+			Expect(ui.Outputs).To(ContainSubstrings([]string{"broker: brokername1"}, []string{"broker: brokername2"}))
+		})
+	})
 })
