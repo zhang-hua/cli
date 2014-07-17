@@ -41,6 +41,7 @@ type RepositoryLocator struct {
 	logsRepo                        LogsRepository
 	authTokenRepo                   CloudControllerServiceAuthTokenRepository
 	serviceBrokerRepo               CloudControllerServiceBrokerRepository
+	servicePlanRepo                 CloudControllerServicePlanRepository
 	userProvidedServiceInstanceRepo CCUserProvidedServiceInstanceRepository
 	buildpackRepo                   CloudControllerBuildpackRepository
 	buildpackBitsRepo               CloudControllerBuildpackBitsRepository
@@ -84,6 +85,7 @@ func NewRepositoryLocator(config configuration.ReadWriter, gatewaysByName map[st
 	loc.serviceRepo = NewCloudControllerServiceRepository(config, cloudControllerGateway)
 	loc.serviceBindingRepo = NewCloudControllerServiceBindingRepository(config, cloudControllerGateway)
 	loc.serviceBrokerRepo = NewCloudControllerServiceBrokerRepository(config, cloudControllerGateway)
+	loc.servicePlanRepo = NewCloudControllerServicePlanRepository(config, cloudControllerGateway)
 	loc.serviceSummaryRepo = NewCloudControllerServiceSummaryRepository(config, cloudControllerGateway)
 	loc.spaceRepo = spaces.NewCloudControllerSpaceRepository(config, cloudControllerGateway)
 	loc.userProvidedServiceInstanceRepo = NewCCUserProvidedServiceInstanceRepository(config, cloudControllerGateway)
@@ -188,6 +190,10 @@ func (locator RepositoryLocator) GetServiceAuthTokenRepository() ServiceAuthToke
 
 func (locator RepositoryLocator) GetServiceBrokerRepository() ServiceBrokerRepository {
 	return locator.serviceBrokerRepo
+}
+
+func (locator RepositoryLocator) GetServicePlanRepository() ServicePlanRepository {
+	return locator.servicePlanRepo
 }
 
 func (locator RepositoryLocator) GetUserProvidedServiceInstanceRepository() UserProvidedServiceInstanceRepository {

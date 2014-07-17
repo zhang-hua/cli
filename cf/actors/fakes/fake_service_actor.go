@@ -2,16 +2,16 @@
 package fakes
 
 import (
-	"sync"
 	"github.com/cloudfoundry/cli/cf/actors"
 	"github.com/cloudfoundry/cli/cf/models"
+	"sync"
 )
 
 type FakeServiceActor struct {
 	GetBrokersWithDependenciesStub        func() ([]models.ServiceBroker, error)
 	getBrokersWithDependenciesMutex       sync.RWMutex
 	getBrokersWithDependenciesArgsForCall []struct{}
-	getBrokersWithDependenciesReturns struct {
+	getBrokersWithDependenciesReturns     struct {
 		result1 []models.ServiceBroker
 		result2 error
 	}

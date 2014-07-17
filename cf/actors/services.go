@@ -62,7 +62,7 @@ func (actor ServiceHandler) getServicePlans(brokers []models.ServiceBroker) ([]m
 		broker := &brokers[brokerIndex]
 		for serviceIndex, _ := range broker.Services {
 			service := &broker.Services[serviceIndex]
-			service.Plans, err = actor.servicePlanRepo.Search(map[string]string{"service-guid": service.Guid})
+			service.Plans, err = actor.servicePlanRepo.Search(map[string]string{"service_guid": service.Guid})
 			if err != nil {
 				return nil, err
 			}

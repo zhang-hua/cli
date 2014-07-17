@@ -50,11 +50,19 @@ func (cmd *ServiceAccess) Run(c *cli.Context) {
 
 	for _, serviceBroker := range brokers {
 		cmd.ui.Say(fmt.Sprintf("broker: %s", serviceBroker.Name))
+
 		table := terminal.NewTable(cmd.ui, []string{"", "service", "plan", "access", "orgs"})
-		for index, service := range serviceBroker.Services {
-			table.Add(fmt.Sprintf("#%d", index), service.Label, "", "", "")
+		for _, service := range serviceBroker.Services {
+			if len(service.Plans) > 0 {
+				for _, plan := range service.Plans {
+					table.Add("", service.Label, plan.Name, "", "")
+				}
+			} else {
+				table.Add("", service.Label, "", "", "")
+			}
 		}
 		table.Print()
+
 		cmd.ui.Say("")
 	}
 }
