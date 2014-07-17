@@ -55,7 +55,7 @@ func (cmd *ServiceAccess) Run(c *cli.Context) {
 		for _, service := range serviceBroker.Services {
 			if len(service.Plans) > 0 {
 				for _, plan := range service.Plans {
-					table.Add("", service.Label, plan.Name, "", "")
+					table.Add("", service.Label, plan.Name, cmd.formatAccess(plan.Public), "")
 				}
 			} else {
 				table.Add("", service.Label, "", "", "")
@@ -65,4 +65,11 @@ func (cmd *ServiceAccess) Run(c *cli.Context) {
 
 		cmd.ui.Say("")
 	}
+}
+
+func (cmd ServiceAccess) formatAccess(public bool) string {
+	if public {
+		return "public"
+	}
+	return "private"
 }
