@@ -42,15 +42,37 @@ var _ = Describe("service-access command", func() {
 	Describe("when logged in", func() {
 		BeforeEach(func() {
 			actor.GetBrokersWithDependenciesReturns([]models.ServiceBroker{
-				{Guid: "broker1", Name: "brokername1"},
-				{Guid: "broker2", Name: "brokername2"},
+				{
+					Guid: "broker1",
+					Name: "brokername1",
+					Services: []models.ServiceOffering{
+						{ServiceOfferingFields: models.ServiceOfferingFields{Label: "my-service-1"}},
+						{ServiceOfferingFields: models.ServiceOfferingFields{Label: "my-service-2"}},
+					},
+				},
+				{
+					Guid: "broker2",
+					Name: "brokername2",
+					Services: []models.ServiceOffering{
+						{ServiceOfferingFields: models.ServiceOfferingFields{Label: "my-service-3"}},
+					},
+				},
 			},
 				nil,
 			)
 		})
+
 		It("prints all of the brokers", func() {
 			runCommand()
-			Expect(ui.Outputs).To(ContainSubstrings([]string{"broker: brokername1"}, []string{"broker: brokername2"}))
+			Expect(ui.Outputs).To(ContainSubstrings(
+				[]string{"broker: brokername1"},
+				[]string{"service", "plan", "access", "orgs"},
+				[]string{"my-service-1"},
+				[]string{"my-service-2"},
+				[]string{"broker: brokername2"},
+				[]string{"service", "plan", "access", "orgs"},
+				[]string{"my-service-3"},
+			))
 		})
 	})
 })
