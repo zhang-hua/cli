@@ -20,7 +20,7 @@ var _ = Describe("Services", func() {
 		brokerRepo = &fakes.FakeServiceBrokerRepo{}
 		serviceRepo = &fakes.FakeServiceRepo{}
 
-		actor = actors.NewServiceActor(brokerRepo, serviceRepo)
+		actor = actors.NewServiceHandler(brokerRepo, serviceRepo)
 	})
 
 	Describe("Get Brokers with Dependencies", func() {
