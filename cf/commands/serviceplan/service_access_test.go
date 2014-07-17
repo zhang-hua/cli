@@ -1,7 +1,7 @@
 package serviceplan_test
 
 import (
-	testapi "github.com/cloudfoundry/cli/cf/api/fakes"
+	testactor "github.com/cloudfoundry/cli/cf/actors/fakes"
 	"github.com/cloudfoundry/cli/cf/models"
 	testcmd "github.com/cloudfoundry/cli/testhelpers/commands"
 	testconfig "github.com/cloudfoundry/cli/testhelpers/configuration"
@@ -17,18 +17,18 @@ import (
 var _ = Describe("service-access command", func() {
 	var (
 		ui                  *testterm.FakeUI
-		brokerRepo          *testapi.FakeServiceBrokerRepo
+		actor               *testactor.FakeServiceActor
 		requirementsFactory *testreq.FakeReqFactory
 	)
 
 	BeforeEach(func() {
 		ui = &testterm.FakeUI{}
-		brokerRepo = &testapi.FakeServiceBrokerRepo{}
+		actor = &testactor.FakeServiceActor{}
 		requirementsFactory = &testreq.FakeReqFactory{LoginSuccess: true}
 	})
 
 	runCommand := func() bool {
-		cmd := NewServiceAccess(ui, testconfig.NewRepositoryWithDefaults(), brokerRepo)
+		cmd := NewServiceAccess(ui, testconfig.NewRepositoryWithDefaults(), actor)
 		return testcmd.RunCommand(cmd, []string{}, requirementsFactory)
 	}
 
@@ -41,11 +41,12 @@ var _ = Describe("service-access command", func() {
 
 	Describe("when logged in", func() {
 		BeforeEach(func() {
-			serviceBrokers := []models.ServiceBroker{
+			actor.GetBrokersWithDependenciesReturns([]models.ServiceBroker{
 				{Guid: "broker1", Name: "brokername1"},
 				{Guid: "broker2", Name: "brokername2"},
-			}
-			brokerRepo.ServiceBrokers = serviceBrokers
+			},
+				nil,
+			)
 		})
 		It("prints all of the brokers", func() {
 			runCommand()

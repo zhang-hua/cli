@@ -3,26 +3,25 @@ package serviceplan
 import (
 	"fmt"
 
-	"github.com/cloudfoundry/cli/cf/api"
+	"github.com/cloudfoundry/cli/cf/actors"
 	"github.com/cloudfoundry/cli/cf/command_metadata"
 	"github.com/cloudfoundry/cli/cf/configuration"
-	"github.com/cloudfoundry/cli/cf/models"
 	"github.com/cloudfoundry/cli/cf/requirements"
 	"github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/codegangsta/cli"
 )
 
 type ServiceAccess struct {
-	ui         terminal.UI
-	config     configuration.Reader
-	brokerRepo api.ServiceBrokerRepository
+	ui     terminal.UI
+	config configuration.Reader
+	actor  actors.ServiceActor
 }
 
-func NewServiceAccess(ui terminal.UI, config configuration.Reader, brokerRepo api.ServiceBrokerRepository) (cmd *ServiceAccess) {
+func NewServiceAccess(ui terminal.UI, config configuration.Reader, actor actors.ServiceActor) (cmd *ServiceAccess) {
 	return &ServiceAccess{
-		ui:         ui,
-		config:     config,
-		brokerRepo: brokerRepo,
+		ui:     ui,
+		config: config,
+		actor:  actor,
 	}
 }
 
@@ -42,14 +41,10 @@ func (cmd *ServiceAccess) GetRequirements(requirementsFactory requirements.Facto
 }
 
 func (cmd *ServiceAccess) Run(c *cli.Context) {
-	brokers := []models.ServiceBroker{}
-	apiErr := cmd.brokerRepo.ListServiceBrokers(func(serviceBroker models.ServiceBroker) bool {
-		brokers = append(brokers, serviceBroker)
-		return true
-	})
+	brokers, err := cmd.actor.GetBrokersWithDependencies()
 
-	if apiErr != nil {
-		cmd.ui.Failed("Failed fetching service brokers.\n%s", apiErr)
+	if err != nil {
+		cmd.ui.Failed("Failed fetching service brokers.\n%s", err)
 		return
 	}
 
