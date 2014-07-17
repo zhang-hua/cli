@@ -10,14 +10,16 @@ type ServiceActor interface {
 }
 
 type ServiceHandler struct {
-	brokerRepo  api.ServiceBrokerRepository
-	serviceRepo api.ServiceRepository
+	brokerRepo      api.ServiceBrokerRepository
+	serviceRepo     api.ServiceRepository
+	servicePlanRepo api.ServicePlanRepository
 }
 
-func NewServiceHandler(broker api.ServiceBrokerRepository, service api.ServiceRepository) ServiceHandler {
+func NewServiceHandler(broker api.ServiceBrokerRepository, service api.ServiceRepository, plan api.ServicePlanRepository) ServiceHandler {
 	return ServiceHandler{
-		brokerRepo:  broker,
-		serviceRepo: service,
+		brokerRepo:      broker,
+		serviceRepo:     service,
+		servicePlanRepo: plan,
 	}
 }
 
@@ -27,14 +29,12 @@ func (actor ServiceHandler) GetBrokersWithDependencies() ([]models.ServiceBroker
 		return nil, err
 	}
 
-	for index, _ := range brokers {
-		brokers[index].Services, err = actor.serviceRepo.ListServicesFromBroker(brokers[index].Guid)
-	}
+	brokers, err = actor.getServices(brokers)
 	if err != nil {
 		return nil, err
 	}
 
-	return brokers, nil
+	return actor.getServicePlans(brokers)
 }
 
 func (actor ServiceHandler) getServiceBrokers() (brokers []models.ServiceBroker, err error) {
@@ -43,4 +43,30 @@ func (actor ServiceHandler) getServiceBrokers() (brokers []models.ServiceBroker,
 		return true
 	})
 	return
+}
+
+func (actor ServiceHandler) getServices(brokers []models.ServiceBroker) ([]models.ServiceBroker, error) {
+	var err error
+	for index, _ := range brokers {
+		brokers[index].Services, err = actor.serviceRepo.ListServicesFromBroker(brokers[index].Guid)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return brokers, nil
+}
+
+func (actor ServiceHandler) getServicePlans(brokers []models.ServiceBroker) ([]models.ServiceBroker, error) {
+	var err error
+	for brokerIndex, _ := range brokers {
+		broker := &brokers[brokerIndex]
+		for serviceIndex, _ := range broker.Services {
+			service := &broker.Services[serviceIndex]
+			service.Plans, err = actor.servicePlanRepo.Search(map[string]string{"service-guid": service.Guid})
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return brokers, nil
 }

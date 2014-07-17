@@ -11,16 +11,18 @@ import (
 
 var _ = Describe("Services", func() {
 	var (
-		actor       actors.ServiceActor
-		brokerRepo  *fakes.FakeServiceBrokerRepo
-		serviceRepo *fakes.FakeServiceRepo
+		actor           actors.ServiceActor
+		brokerRepo      *fakes.FakeServiceBrokerRepo
+		serviceRepo     *fakes.FakeServiceRepo
+		servicePlanRepo *fakes.FakeServicePlanRepo
 	)
 
 	BeforeEach(func() {
 		brokerRepo = &fakes.FakeServiceBrokerRepo{}
 		serviceRepo = &fakes.FakeServiceRepo{}
+		servicePlanRepo = &fakes.FakeServicePlanRepo{}
 
-		actor = actors.NewServiceHandler(brokerRepo, serviceRepo)
+		actor = actors.NewServiceHandler(brokerRepo, serviceRepo, servicePlanRepo)
 	})
 
 	Describe("Get Brokers with Dependencies", func() {
@@ -38,6 +40,11 @@ var _ = Describe("Services", func() {
 						{ServiceOfferingFields: models.ServiceOfferingFields{Guid: "service-guid2", Label: "my-service2"}},
 					},
 				}
+
+				servicePlanRepo.SearchReturns = map[string][]models.ServicePlanFields{
+					"service-guid":  {{Name: "service-plan"}, {Name: "other-plan"}},
+					"service-guid2": {{Name: "service-plan2"}},
+				}
 			})
 
 			It("Populates Services", func() {
@@ -48,8 +55,12 @@ var _ = Describe("Services", func() {
 				Expect(len(brokers)).To(Equal(2))
 				Expect(len(brokers[0].Services)).To(Equal(0))
 				Expect(len(brokers[1].Services)).To(Equal(2))
+
 				Expect(brokers[1].Services[0].Guid).To(Equal("service-guid"))
+				Expect(brokers[1].Services[0].Plans[0].Name).To(Equal("service-plan"))
+				Expect(brokers[1].Services[0].Plans[1].Name).To(Equal("other-plan"))
 				Expect(brokers[1].Services[1].Guid).To(Equal("service-guid2"))
+				Expect(brokers[1].Services[1].Plans[0].Name).To(Equal("service-plan2"))
 			})
 		})
 	})
