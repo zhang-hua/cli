@@ -29,6 +29,8 @@ func NewServiceHandler(broker api.ServiceBrokerRepository, service api.ServiceRe
 	}
 }
 
+func 
+
 func (actor ServiceHandler) GetBrokerWithSingleService(serviceLabel string) ([]models.ServiceBroker, error) {
 	service, err := actor.serviceRepo.FindServiceOfferingByLabel(serviceLabel)
 	if err != nil {
