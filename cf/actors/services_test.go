@@ -51,13 +51,16 @@ var _ = Describe("Services", func() {
 		serviceRepo.FindServiceOfferingByLabelServiceOffering = service2
 
 		servicePlanRepo.SearchReturns = map[string][]models.ServicePlanFields{
-			"service-guid":  {{Name: "service-plan", Guid: "service-plan-guid"}, {Name: "other-plan", Guid: "other-plan-guid"}},
-			"service-guid2": {{Name: "service-plan2", Guid: "service-plan2-guid"}},
+			"service-guid": {{Name: "service-plan", Guid: "service-plan-guid", ServiceOfferingGuid: "service-guid"},
+				{Name: "other-plan", Guid: "other-plan-guid", ServiceOfferingGuid: "service-guid", Public: true}},
+			"service-guid2": {{Name: "service-plan2", Guid: "service-plan2-guid", ServiceOfferingGuid: "service-guid2"}},
 		}
 
 		servicePlanVisibilityRepo.ListReturns([]models.ServicePlanVisibilityFields{
 			{ServicePlanGuid: "service-plan2-guid", OrganizationGuid: "org-guid"},
+			{ServicePlanGuid: "service-plan-guid", OrganizationGuid: "org-guid"},
 			{ServicePlanGuid: "service-plan2-guid", OrganizationGuid: "org2-guid"},
+			{ServicePlanGuid: "other-plan-guid", OrganizationGuid: "org-guid"},
 		}, nil)
 
 		org1 := models.Organization{}
@@ -72,6 +75,40 @@ var _ = Describe("Services", func() {
 			org1,
 			org2,
 		}
+	})
+
+	Describe("GetBrokersWithVisibilityFromASingleOrg", func() {
+		It("Returns a slice of brokers containing Services/Service Plans visible to the org", func() {
+			servicePlanRepo.SearchReturns = map[string][]models.ServicePlanFields{
+				"service-guid": {{Name: "service-plan", Guid: "service-plan-guid", ServiceOfferingGuid: "service-guid"},
+					{Name: "other-plan", Guid: "other-plan-guid", ServiceOfferingGuid: "service-guid", Public: true}},
+			}
+			serviceRepo.GetServiceOfferingByGuidReturns.ServiceOffering = models.ServiceOffering{
+				ServiceOfferingFields: models.ServiceOfferingFields{Guid: "service-guid", Label: "my-service", BrokerGuid: "my-service-broker-guid"},
+			}
+			serviceRepo.GetServiceOfferingByGuidReturns.Error = nil
+			brokerRepo.FindByGuidServiceBroker = models.ServiceBroker{Guid: "my-service-broker-guid", Name: "my-service-broker"}
+
+			brokers, err := actor.GetBrokersWithVisibilityFromASingleOrg("org1")
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(len(brokers)).To(Equal(1))
+			Expect(len(brokers[0].Services)).To(Equal(1))
+			Expect(len(brokers[0].Services[0].Plans)).To(Equal(2))
+
+			Expect(brokers[0].Services[0].Guid).To(Equal("service-guid"))
+			Expect(brokers[0].Services[0].Plans[0].Name).To(Equal("service-plan"))
+			Expect(brokers[0].Services[0].Plans[0].OrgNames).To(Equal([]string{"org1"}))
+			Expect(brokers[0].Services[0].Plans[1].Name).To(Equal("other-plan"))
+		})
+
+		It("ignores any service that does not have a a broker guid attached", func() {
+			//The service offering fixtures we use don't have broker guids attached, and thus we ignore them.
+			brokers, err := actor.GetBrokersWithVisibilityFromASingleOrg("org1")
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(len(brokers)).To(Equal(0))
+		})
 	})
 
 	Describe("GetBrokerWithSingleService", func() {
