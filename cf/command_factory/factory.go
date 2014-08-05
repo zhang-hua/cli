@@ -5,6 +5,7 @@ import (
 	. "github.com/cloudfoundry/cli/cf/i18n"
 
 	"github.com/cloudfoundry/cli/cf/actors"
+	"github.com/cloudfoundry/cli/cf/actors/broker_builder"
 	"github.com/cloudfoundry/cli/cf/api"
 	"github.com/cloudfoundry/cli/cf/command"
 	"github.com/cloudfoundry/cli/cf/command_metadata"
@@ -192,11 +193,15 @@ func NewFactory(ui terminal.UI, config configuration.ReadWriter, manifestRepo ma
 		ui, config,
 		actors.NewServiceHandler(
 			repoLocator.GetServiceBrokerRepository(),
-			repoLocator.GetServiceRepository(),
-			repoLocator.GetServicePlanRepository(),
-			repoLocator.GetServicePlanVisibilityRepository(),
 			repoLocator.GetOrganizationRepository(),
-		))
+			broker_builder.NewBuilder(
+				repoLocator.GetServiceBrokerRepository(),
+				repoLocator.GetServiceRepository(),
+				repoLocator.GetServicePlanRepository(),
+				repoLocator.GetServicePlanVisibilityRepository(),
+				repoLocator.GetOrganizationRepository(),
+			)),
+	)
 	factory.cmdsByName["enable-service-access"] = serviceaccess.NewEnableServiceAccess(
 		ui, config,
 		actors.NewServicePlanHandler(

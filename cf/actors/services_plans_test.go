@@ -31,7 +31,6 @@ var _ = Describe("Service Plans", func() {
 	)
 
 	BeforeEach(func() {
-		serviceRepo = &fakes.FakeServiceRepo{}
 		servicePlanRepo = &fakes.FakeServicePlanRepo{}
 		servicePlanVisibilityRepo = &fakes.FakeServicePlanVisibilityRepository{}
 		orgRepo = &fakes.FakeOrgRepository{}
