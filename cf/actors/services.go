@@ -1,8 +1,6 @@
 package actors
 
 import (
-	"errors"
-
 	"github.com/cloudfoundry/cli/cf/actors/broker_builder"
 	"github.com/cloudfoundry/cli/cf/actors/service_builder"
 	"github.com/cloudfoundry/cli/cf/api"
@@ -14,15 +12,13 @@ type ServiceActor interface {
 }
 
 type ServiceHandler struct {
-	brokerRepo     api.ServiceBrokerRepository
 	orgRepo        api.OrganizationRepository
 	brokerBuilder  broker_builder.BrokerBuilder
 	serviceBuilder service_builder.ServiceBuilder
 }
 
-func NewServiceHandler(broker api.ServiceBrokerRepository, org api.OrganizationRepository, brokerBuilder broker_builder.BrokerBuilder, serviceBuilder service_builder.ServiceBuilder) ServiceHandler {
+func NewServiceHandler(org api.OrganizationRepository, brokerBuilder broker_builder.BrokerBuilder, serviceBuilder service_builder.ServiceBuilder) ServiceHandler {
 	return ServiceHandler{
-		brokerRepo:     broker,
 		orgRepo:        org,
 		brokerBuilder:  brokerBuilder,
 		serviceBuilder: serviceBuilder,
@@ -47,23 +43,22 @@ func (actor ServiceHandler) checkForOrgExistence(orgName string) error {
 }
 
 func (actor ServiceHandler) getServiceBrokers(brokerName string, serviceName string) ([]models.ServiceBroker, error) {
-	if brokerName != "" && serviceName != "" {
+	if serviceName != "" {
 		brokers, err := actor.brokerBuilder.GetBrokerWithSpecifiedService(serviceName)
 		if err != nil {
 			return nil, err
 		}
-		if brokers[0].Name != brokerName {
-			return nil, errors.New("That service is not attached to the specified broker")
+
+		if brokerName != "" {
+			if brokers != nil && brokers[0].Name != brokerName {
+				return nil, nil
+			}
 		}
 		return brokers, nil
 	}
 
 	if brokerName != "" && serviceName == "" {
 		return actor.brokerBuilder.GetBrokerWithAllServices(brokerName)
-	}
-
-	if brokerName == "" && serviceName != "" {
-		return actor.brokerBuilder.GetBrokerWithSpecifiedService(serviceName)
 	}
 
 	return actor.brokerBuilder.GetAllServiceBrokers()

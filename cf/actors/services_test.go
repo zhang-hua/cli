@@ -14,7 +14,6 @@ import (
 var _ = Describe("Services", func() {
 	var (
 		actor          actors.ServiceActor
-		brokerRepo     *fakes.FakeServiceBrokerRepo
 		brokerBuilder  *broker_builder.FakeBrokerBuilder
 		serviceBuilder *service_builder.FakeServiceBuilder
 		orgRepo        *fakes.FakeOrgRepository
@@ -24,22 +23,14 @@ var _ = Describe("Services", func() {
 	)
 
 	BeforeEach(func() {
-		brokerRepo = &fakes.FakeServiceBrokerRepo{}
 		orgRepo = &fakes.FakeOrgRepository{}
 		brokerBuilder = &broker_builder.FakeBrokerBuilder{}
 		serviceBuilder = &service_builder.FakeServiceBuilder{}
 
-		actor = actors.NewServiceHandler(brokerRepo, orgRepo, brokerBuilder, serviceBuilder)
+		actor = actors.NewServiceHandler(orgRepo, brokerBuilder, serviceBuilder)
 
-		serviceBroker1 = models.ServiceBroker{Guid: "my-service-broker-guid", Name: "my-service-broker"}
+		serviceBroker1 = models.ServiceBroker{Guid: "my-service-broker-guid1", Name: "my-service-broker1"}
 		serviceBroker2 = models.ServiceBroker{Guid: "my-service-broker-guid2", Name: "my-service-broker2"}
-
-		brokerRepo.FindByNameServiceBroker = serviceBroker2
-
-		brokerRepo.ServiceBrokers = []models.ServiceBroker{
-			serviceBroker1,
-			serviceBroker2,
-		}
 
 		service1 = models.ServiceOffering{ServiceOfferingFields: models.ServiceOfferingFields{
 			Label:      "my-service1",
@@ -64,7 +55,6 @@ var _ = Describe("Services", func() {
 	Describe("FilterBrokers", func() {
 		Context("when no flags are passed", func() {
 			It("returns all brokers", func() {
-				serviceBroker1.Services = []models.ServiceOffering{service1}
 				returnedBrokers := []models.ServiceBroker{serviceBroker1}
 				brokerBuilder.GetAllServiceBrokersReturns(returnedBrokers, nil)
 
@@ -72,15 +62,11 @@ var _ = Describe("Services", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(len(brokers)).To(Equal(1))
-				Expect(len(brokers[0].Services)).To(Equal(1))
-
-				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid1"))
 			})
 		})
 
 		Context("when the -b flag is passed", func() {
 			It("returns a single broker contained in a slice with all dependencies populated", func() {
-				serviceBroker1.Services = []models.ServiceOffering{service1}
 				returnedBroker := []models.ServiceBroker{serviceBroker1}
 				brokerBuilder.GetBrokerWithAllServicesReturns(returnedBroker, nil)
 
@@ -88,9 +74,6 @@ var _ = Describe("Services", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(len(brokers)).To(Equal(1))
-				Expect(len(brokers[0].Services)).To(Equal(1))
-
-				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid1"))
 			})
 		})
 
@@ -118,46 +101,44 @@ var _ = Describe("Services", func() {
 				Expect(err).To(HaveOccurred())
 			})
 
-			FIt("returns a slice of brokers containing Services/Service Plans visible to the org", func() {
-				brokerRepo.FindByGuidServiceBroker = models.ServiceBroker{Guid: "my-service-broker-guid", Name: "my-service-broker"}
+			It("returns a slice of brokers containing Services/Service Plans visible to the org", func() {
+				serviceBroker1.Services = []models.ServiceOffering{service1}
+				returnedBroker := []models.ServiceBroker{serviceBroker1}
+
+				serviceBuilder.GetServicesVisibleToOrgReturns([]models.ServiceOffering{service1}, nil)
+				brokerBuilder.GetBrokersForServicesReturns(returnedBroker, nil)
 
 				brokers, err := actor.FilterBrokers("", "", "org1")
 				Expect(err).NotTo(HaveOccurred())
+
+				orgName := serviceBuilder.GetServicesVisibleToOrgArgsForCall(0)
+				Expect(orgName).To(Equal("org1"))
 
 				Expect(len(brokers)).To(Equal(1))
 				Expect(len(brokers[0].Services)).To(Equal(1))
-				Expect(len(brokers[0].Services[0].Plans)).To(Equal(2))
-
-				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid"))
-				Expect(brokers[0].Services[0].Plans[0].Name).To(Equal("service-plan"))
-				Expect(brokers[0].Services[0].Plans[0].OrgNames).To(Equal([]string{"org1", "org2"}))
-				Expect(brokers[0].Services[0].Plans[1].Name).To(Equal("other-plan"))
-			})
-
-			It("ignores any service that does not have a a broker guid attached", func() {
-				//The service offering fixtures we use don't have broker guids attached, and thus we ignore them.
-				brokers, err := actor.FilterBrokers("", "", "org1")
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(len(brokers)).To(Equal(0))
+				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid1"))
 			})
 		})
 
 		Context("when the -b AND the -e flags are passed", func() {
 			It("returns the intersection set", func() {
-				brokers, err := actor.FilterBrokers("my-service-broker2", "my-service2", "")
-				Expect(err).To(BeNil())
+				serviceBroker1.Services = []models.ServiceOffering{service1}
+				returnedBrokers := []models.ServiceBroker{serviceBroker1}
+				brokerBuilder.GetBrokerWithSpecifiedServiceReturns(returnedBrokers, nil)
+
+				brokers, err := actor.FilterBrokers("my-service-broker1", "my-service1", "")
+				Expect(err).NotTo(HaveOccurred())
+
 				Expect(len(brokers)).To(Equal(1))
 				Expect(len(brokers[0].Services)).To(Equal(1))
 
-				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid2"))
-				Expect(brokers[0].Services[0].Plans[0].Name).To(Equal("service-plan2"))
-				Expect(brokers[0].Services[0].Plans[0].OrgNames).To(Equal([]string{"org1", "org2"}))
+				Expect(brokers[0].Services[0].Label).To(Equal("my-service1"))
+				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid1"))
 			})
 
 			Context("when the -b AND -e intersection is the empty set", func() {
 				It("returns an empty set", func() {
-					brokerRepo.FindByNameServiceBroker = serviceBroker1
+					brokerBuilder.GetBrokerWithSpecifiedServiceReturns(nil, nil)
 					brokers, err := actor.FilterBrokers("my-service-broker", "my-service2", "")
 
 					Expect(len(brokers)).To(Equal(0))
@@ -168,41 +149,59 @@ var _ = Describe("Services", func() {
 
 		Context("when the -b AND the -o flags are passed", func() {
 			It("returns the intersection set", func() {
-				brokerRepo.FindByGuidServiceBroker = models.ServiceBroker{Guid: "my-service-broker-guid", Name: "my-service-broker"}
+				serviceBroker1.Services = []models.ServiceOffering{service1}
+				returnedBrokers := []models.ServiceBroker{serviceBroker1}
+
+				serviceBuilder.GetServiceVisibleToOrgReturns([]models.ServiceOffering{service1}, nil)
+				brokerBuilder.GetSpecificBrokerForServicesReturns(returnedBrokers, nil)
 
 				brokers, err := actor.FilterBrokers("my-service-broker", "", "org1")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(len(brokers)).To(Equal(1))
 				Expect(len(brokers[0].Services)).To(Equal(1))
-				Expect(len(brokers[0].Services[0].Plans)).To(Equal(2))
 
-				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid"))
-				Expect(brokers[0].Services[0].Plans[0].Name).To(Equal("service-plan"))
-				Expect(brokers[0].Services[0].Plans[0].OrgNames).To(Equal([]string{"org1", "org2"}))
-				Expect(brokers[0].Services[0].Plans[1].Name).To(Equal("other-plan"))
+				Expect(brokers[0].Services[0].Label).To(Equal("my-service1"))
+				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid1"))
 			})
 		})
 
 		Context("when the -e AND the -o flags are passed", func() {
 			It("returns the intersection set", func() {
-				brokerRepo.FindByGuidServiceBroker = models.ServiceBroker{Guid: "my-service-broker-guid", Name: "my-service-broker"}
+				serviceBroker1.Services = []models.ServiceOffering{service1}
+				returnedBrokers := []models.ServiceBroker{serviceBroker1}
 
-				brokers, err := actor.FilterBrokers("", "my-service", "org1")
+				serviceBuilder.GetServicesVisibleToOrgReturns([]models.ServiceOffering{service1}, nil)
+				brokerBuilder.GetBrokersForServicesReturns(returnedBrokers, nil)
+
+				brokers, err := actor.FilterBrokers("", "my-service1", "org1")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(len(brokers)).To(Equal(1))
 				Expect(len(brokers[0].Services)).To(Equal(1))
-				Expect(len(brokers[0].Services[0].Plans)).To(Equal(2))
 
-				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid"))
-				Expect(brokers[0].Services[0].Plans[0].Name).To(Equal("service-plan"))
-				Expect(brokers[0].Services[0].Plans[0].OrgNames).To(Equal([]string{"org1", "org2"}))
-				Expect(brokers[0].Services[0].Plans[1].Name).To(Equal("other-plan"))
+				Expect(brokers[0].Services[0].Label).To(Equal("my-service1"))
+				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid1"))
 			})
 		})
 
 		Context("when the -b AND -e AND the -o flags are passed", func() {
+			It("returns the intersection set", func() {
+				serviceBroker1.Services = []models.ServiceOffering{service1}
+				returnedBrokers := []models.ServiceBroker{serviceBroker1}
+
+				serviceBuilder.GetServicesVisibleToOrgReturns([]models.ServiceOffering{service1}, nil)
+				brokerBuilder.GetSpecificBrokerForServicesReturns(returnedBrokers, nil)
+
+				brokers, err := actor.FilterBrokers("my-service-broker1", "my-service1", "org1")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(len(brokers)).To(Equal(1))
+				Expect(len(brokers[0].Services)).To(Equal(1))
+
+				Expect(brokers[0].Services[0].Label).To(Equal("my-service1"))
+				Expect(brokers[0].Services[0].Guid).To(Equal("service-guid1"))
+			})
 		})
 	})
 })
