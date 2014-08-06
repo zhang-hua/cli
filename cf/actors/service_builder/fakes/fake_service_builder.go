@@ -3,11 +3,20 @@ package fakes
 
 import (
 	"sync"
-	. "github.com/cloudfoundry/cli/cf/actors/service_builder"
+	"github.com/cloudfoundry/cli/cf/actors/service_builder"
 	"github.com/cloudfoundry/cli/cf/models"
 )
 
 type FakeServiceBuilder struct {
+	GetServicesForBrokerStub        func(string) ([]models.ServiceOffering, error)
+	getServicesForBrokerMutex       sync.RWMutex
+	getServicesForBrokerArgsForCall []struct {
+		arg1 string
+	}
+	getServicesForBrokerReturns struct {
+		result1 []models.ServiceOffering
+		result2 error
+	}
 	GetServiceVisibleToOrgStub        func(string, string) ([]models.ServiceOffering, error)
 	getServiceVisibleToOrgMutex       sync.RWMutex
 	getServiceVisibleToOrgArgsForCall []struct {
@@ -38,6 +47,39 @@ type FakeServiceBuilder struct {
 	}
 }
 
+func (fake *FakeServiceBuilder) GetServicesForBroker(arg1 string) ([]models.ServiceOffering, error) {
+	fake.getServicesForBrokerMutex.Lock()
+	defer fake.getServicesForBrokerMutex.Unlock()
+	fake.getServicesForBrokerArgsForCall = append(fake.getServicesForBrokerArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	if fake.GetServicesForBrokerStub != nil {
+		return fake.GetServicesForBrokerStub(arg1)
+	} else {
+		return fake.getServicesForBrokerReturns.result1, fake.getServicesForBrokerReturns.result2
+	}
+}
+
+func (fake *FakeServiceBuilder) GetServicesForBrokerCallCount() int {
+	fake.getServicesForBrokerMutex.RLock()
+	defer fake.getServicesForBrokerMutex.RUnlock()
+	return len(fake.getServicesForBrokerArgsForCall)
+}
+
+func (fake *FakeServiceBuilder) GetServicesForBrokerArgsForCall(i int) string {
+	fake.getServicesForBrokerMutex.RLock()
+	defer fake.getServicesForBrokerMutex.RUnlock()
+	return fake.getServicesForBrokerArgsForCall[i].arg1
+}
+
+func (fake *FakeServiceBuilder) GetServicesForBrokerReturns(result1 []models.ServiceOffering, result2 error) {
+	fake.GetServicesForBrokerStub = nil
+	fake.getServicesForBrokerReturns = struct {
+		result1 []models.ServiceOffering
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeServiceBuilder) GetServiceVisibleToOrg(arg1 string, arg2 string) ([]models.ServiceOffering, error) {
 	fake.getServiceVisibleToOrgMutex.Lock()
 	defer fake.getServiceVisibleToOrgMutex.Unlock()
@@ -65,6 +107,7 @@ func (fake *FakeServiceBuilder) GetServiceVisibleToOrgArgsForCall(i int) (string
 }
 
 func (fake *FakeServiceBuilder) GetServiceVisibleToOrgReturns(result1 []models.ServiceOffering, result2 error) {
+	fake.GetServiceVisibleToOrgStub = nil
 	fake.getServiceVisibleToOrgReturns = struct {
 		result1 []models.ServiceOffering
 		result2 error
@@ -97,6 +140,7 @@ func (fake *FakeServiceBuilder) GetServicesVisibleToOrgArgsForCall(i int) string
 }
 
 func (fake *FakeServiceBuilder) GetServicesVisibleToOrgReturns(result1 []models.ServiceOffering, result2 error) {
+	fake.GetServicesVisibleToOrgStub = nil
 	fake.getServicesVisibleToOrgReturns = struct {
 		result1 []models.ServiceOffering
 		result2 error
@@ -129,10 +173,11 @@ func (fake *FakeServiceBuilder) AttachPlansToServiceArgsForCall(i int) models.Se
 }
 
 func (fake *FakeServiceBuilder) AttachPlansToServiceReturns(result1 models.ServiceOffering, result2 error) {
+	fake.AttachPlansToServiceStub = nil
 	fake.attachPlansToServiceReturns = struct {
 		result1 models.ServiceOffering
 		result2 error
 	}{result1, result2}
 }
 
-var _ ServiceBuilder = new(FakeServiceBuilder)
+var _ service_builder.ServiceBuilder = new(FakeServiceBuilder)

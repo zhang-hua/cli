@@ -1,6 +1,7 @@
 package broker_builder
 
 import (
+	"github.com/cloudfoundry/cli/cf/actors/service_builder"
 	"github.com/cloudfoundry/cli/cf/api"
 	"github.com/cloudfoundry/cli/cf/models"
 )
@@ -14,29 +15,33 @@ type BrokerBuilder interface {
 }
 
 type Builder struct {
-	brokerRepo                api.ServiceBrokerRepository
-	serviceRepo               api.ServiceRepository
-	servicePlanRepo           api.ServicePlanRepository
-	servicePlanVisibilityRepo api.ServicePlanVisibilityRepository
-	orgRepo                   api.OrganizationRepository
+	brokerRepo     api.ServiceBrokerRepository
+	serviceBuilder service_builder.ServiceBuilder
 }
 
-func NewBuilder(broker api.ServiceBrokerRepository, service api.ServiceRepository, plan api.ServicePlanRepository, vis api.ServicePlanVisibilityRepository, org api.OrganizationRepository) Builder {
+func NewBuilder(broker api.ServiceBrokerRepository, serviceBuilder service_builder.ServiceBuilder) Builder {
 	return Builder{
-		brokerRepo:                broker,
-		serviceRepo:               service,
-		servicePlanRepo:           plan,
-		servicePlanVisibilityRepo: vis,
-		orgRepo:                   org,
+		brokerRepo:     broker,
+		serviceBuilder: serviceBuilder,
 	}
 }
 
-func (builder Builder) GetAllServiceBrokers() (brokers []models.ServiceBroker, err error) {
-	err = builder.brokerRepo.ListServiceBrokers(func(broker models.ServiceBroker) bool {
+func (builder Builder) GetAllServiceBrokers() ([]models.ServiceBroker, error) {
+	brokers := []models.ServiceBroker{}
+	err := builder.brokerRepo.ListServiceBrokers(func(broker models.ServiceBroker) bool {
 		brokers = append(brokers, broker)
 		return true
 	})
-	return
+
+	for index, broker := range brokers {
+		services, err := builder.serviceBuilder.GetServicesForBroker(broker.Guid)
+		if err != nil {
+			return nil, err
+		}
+
+		brokers[index].Services = services
+	}
+	return brokers, err
 }
 
 func (builder Builder) GetBrokersForServices([]models.ServiceOffering) ([]models.ServiceBroker, error) {

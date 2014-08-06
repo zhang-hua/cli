@@ -6,6 +6,8 @@ import (
 )
 
 type ServiceBuilder interface {
+	GetServicesForBroker(string) ([]models.ServiceOffering, error)
+
 	GetServiceVisibleToOrg(string, string) ([]models.ServiceOffering, error)
 	GetServicesVisibleToOrg(string) ([]models.ServiceOffering, error)
 	AttachPlansToService(models.ServiceOffering) (models.ServiceOffering, error)
