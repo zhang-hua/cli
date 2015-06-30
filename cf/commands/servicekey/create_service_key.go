@@ -15,11 +15,11 @@ import (
 )
 
 type CreateServiceKey struct {
-	ui                  terminal.UI
-	config              core_config.Reader
-	serviceRepo         api.ServiceRepository
-	serviceKeyRepo      api.ServiceKeyRepository
-	serviceInstanceGuid string
+	ui                         terminal.UI
+	config                     core_config.Reader
+	serviceRepo                api.ServiceRepository
+	serviceKeyRepo             api.ServiceKeyRepository
+	serviceInstanceRequirement requirements.ServiceInstanceRequirement
 }
 
 func NewCreateServiceKey(ui terminal.UI, config core_config.Reader, serviceRepo api.ServiceRepository, serviceKeyRepo api.ServiceKeyRepository) (cmd *CreateServiceKey) {
@@ -64,17 +64,16 @@ func (cmd *CreateServiceKey) GetRequirements(requirementsFactory requirements.Fa
 	}
 
 	loginRequirement := requirementsFactory.NewLoginRequirement()
-	serviceInstanceRequirement := requirementsFactory.NewServiceInstanceRequirement(c.Args()[0])
-	cmd.serviceInstanceGuid = serviceInstanceRequirement.GetServiceInstance().Guid
+	cmd.serviceInstanceRequirement = requirementsFactory.NewServiceInstanceRequirement(c.Args()[0])
 	targetSpaceRequirement := requirementsFactory.NewTargetedSpaceRequirement()
 
-	reqs = []requirements.Requirement{loginRequirement, serviceInstanceRequirement, targetSpaceRequirement}
+	reqs = []requirements.Requirement{loginRequirement, cmd.serviceInstanceRequirement, targetSpaceRequirement}
 
 	return reqs, nil
 }
 
 func (cmd *CreateServiceKey) Run(c *cli.Context) {
-	serviceInstanceName := c.Args()[0]
+	serviceInstance := cmd.serviceInstanceRequirement.GetServiceInstance()
 	serviceKeyName := c.Args()[1]
 	params := c.String("c")
 
@@ -85,12 +84,12 @@ func (cmd *CreateServiceKey) Run(c *cli.Context) {
 
 	cmd.ui.Say(T("Creating service key {{.ServiceKeyName}} for service instance {{.ServiceInstanceName}} as {{.CurrentUser}}...",
 		map[string]interface{}{
-			"ServiceInstanceName": terminal.EntityNameColor(serviceInstanceName),
+			"ServiceInstanceName": terminal.EntityNameColor(serviceInstance.Name),
 			"ServiceKeyName":      terminal.EntityNameColor(serviceKeyName),
 			"CurrentUser":         terminal.EntityNameColor(cmd.config.Username()),
 		}))
 
-	err = cmd.serviceKeyRepo.CreateServiceKey(cmd.serviceInstanceGuid, serviceKeyName, paramsMap)
+	err = cmd.serviceKeyRepo.CreateServiceKey(serviceInstance.Guid, serviceKeyName, paramsMap)
 	switch err.(type) {
 	case nil:
 		cmd.ui.Ok()

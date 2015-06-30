@@ -48,10 +48,9 @@ func (cmd DeleteServiceKey) GetRequirements(requirementsFactory requirements.Fac
 	}
 
 	loginRequirement := requirementsFactory.NewLoginRequirement()
-	serviceInstanceRequirement := requirementsFactory.NewServiceInstanceRequirement(c.Args()[0])
 	targetSpaceRequirement := requirementsFactory.NewTargetedSpaceRequirement()
 
-	reqs = []requirements.Requirement{loginRequirement, serviceInstanceRequirement, targetSpaceRequirement}
+	reqs = []requirements.Requirement{loginRequirement, targetSpaceRequirement}
 
 	return reqs, nil
 }

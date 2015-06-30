@@ -38,6 +38,7 @@ var _ = Describe("create-service-key command", func() {
 		serviceRepo = &testapi.FakeServiceRepo{}
 		serviceInstance := models.ServiceInstance{}
 		serviceInstance.Guid = "fake-instance-guid"
+		serviceInstance.Name = "fake-service-instance"
 		serviceRepo.FindInstanceByNameMap = generic.NewMap()
 		serviceRepo.FindInstanceByNameMap.Set("fake-service-instance", serviceInstance)
 		serviceKeyRepo = testapi.NewFakeServiceKeyRepo()

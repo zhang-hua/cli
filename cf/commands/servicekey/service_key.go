@@ -14,11 +14,11 @@ import (
 )
 
 type ServiceKey struct {
-	ui                  terminal.UI
-	config              core_config.Reader
-	serviceRepo         api.ServiceRepository
-	serviceKeyRepo      api.ServiceKeyRepository
-	serviceInstanceGuid string
+	ui                         terminal.UI
+	config                     core_config.Reader
+	serviceRepo                api.ServiceRepository
+	serviceKeyRepo             api.ServiceKeyRepository
+	serviceInstanceRequirement requirements.ServiceInstanceRequirement
 }
 
 func NewGetServiceKey(ui terminal.UI, config core_config.Reader, serviceRepo api.ServiceRepository, serviceKeyRepo api.ServiceKeyRepository) (cmd *ServiceKey) {
@@ -50,20 +50,19 @@ func (cmd *ServiceKey) GetRequirements(requirementsFactory requirements.Factory,
 	}
 
 	loginRequirement := requirementsFactory.NewLoginRequirement()
-	serviceInstanceRequirement := requirementsFactory.NewServiceInstanceRequirement(c.Args()[0])
-	cmd.serviceInstanceGuid = serviceInstanceRequirement.GetServiceInstance().Guid
+	cmd.serviceInstanceRequirement = requirementsFactory.NewServiceInstanceRequirement(c.Args()[0])
 	targetSpaceRequirement := requirementsFactory.NewTargetedSpaceRequirement()
 
-	reqs = []requirements.Requirement{loginRequirement, serviceInstanceRequirement, targetSpaceRequirement}
+	reqs = []requirements.Requirement{loginRequirement, cmd.serviceInstanceRequirement, targetSpaceRequirement}
 
 	return reqs, nil
 }
 
 func (cmd *ServiceKey) Run(c *cli.Context) {
-	serviceInstanceName := c.Args()[0]
+	serviceInstance := cmd.serviceInstanceRequirement.GetServiceInstance()
 	serviceKeyName := c.Args()[1]
 
-	serviceKey, err := cmd.serviceKeyRepo.GetServiceKey(cmd.serviceInstanceGuid, serviceKeyName)
+	serviceKey, err := cmd.serviceKeyRepo.GetServiceKey(serviceInstance.Guid, serviceKeyName)
 	if err != nil {
 		cmd.ui.Failed(err.Error())
 		return
@@ -75,7 +74,7 @@ func (cmd *ServiceKey) Run(c *cli.Context) {
 		cmd.ui.Say(T("Getting key {{.ServiceKeyName}} for service instance {{.ServiceInstanceName}} as {{.CurrentUser}}...",
 			map[string]interface{}{
 				"ServiceKeyName":      terminal.EntityNameColor(serviceKeyName),
-				"ServiceInstanceName": terminal.EntityNameColor(serviceInstanceName),
+				"ServiceInstanceName": terminal.EntityNameColor(c.Args()[0]),
 				"CurrentUser":         terminal.EntityNameColor(cmd.config.Username()),
 			}))
 
@@ -83,7 +82,7 @@ func (cmd *ServiceKey) Run(c *cli.Context) {
 			cmd.ui.Say(T("No service key {{.ServiceKeyName}} found for service instance {{.ServiceInstanceName}}",
 				map[string]interface{}{
 					"ServiceKeyName":      terminal.EntityNameColor(serviceKeyName),
-					"ServiceInstanceName": terminal.EntityNameColor(serviceInstanceName)}))
+					"ServiceInstanceName": terminal.EntityNameColor(serviceInstance.Name)}))
 			return
 		}
 
